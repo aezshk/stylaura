@@ -1,0 +1,58 @@
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+env/
+**/env/
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+**/dist/
+build/
+**/build/
+
+# Logs and temporary files
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Python generated files
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local database
+db.sqlite3
+*.sqlite3
+
+# Local editor and operating system files
+.vscode/
+.idea/
+*.lnk
+
+# Postman local configuration
+.postman/
+postman/
+# Django local files and generated data
+*.sqlite3
+__pycache__/
+*.py[cod]
+
+# Local uploads - review before publishing
+media/
+
+# Windows shortcuts
+*.lnk
+
+# Root dependencies
+/node_modules/
