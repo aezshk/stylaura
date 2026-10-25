@@ -1,0 +1,5 @@
+
+{
+  "buildCommand": "cd stylaura-frontend && npm install && npm run build",
+  "outputDirectory": "stylaura-frontend/dist"
+}
