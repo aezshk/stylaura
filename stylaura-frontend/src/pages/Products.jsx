@@ -1,10 +1,11 @@
+import API_BASE_URL from "../api";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
-const API_URL = "http://localhost:5000/api/products";
+const API_URL = `${API_BASE_URL}/api/products`;
 const RECOMMENDATION_URL =
-  "http://localhost:5000/api/recommendations";
-const CART_URL = "http://localhost:5000/api/cart";
+  `${API_BASE_URL}/api/recommendations`;
+const CART_URL = `${API_BASE_URL}/api/cart`;
 
 function Products() {
   const [searchParams] = useSearchParams();

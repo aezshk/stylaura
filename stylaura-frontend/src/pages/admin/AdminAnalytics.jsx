@@ -1,3 +1,4 @@
+import API_BASE_URL from "../../api";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -21,21 +22,21 @@ function AdminAnalytics() {
       const [ordersResponse, usersResponse, productsResponse] =
         await Promise.all([
           fetch(
-            "http://localhost:5000/api/orders/admin",
+            `${API_BASE_URL}/api/orders/admin`,
             {
               credentials: "include",
             }
           ),
 
           fetch(
-            "http://localhost:5000/api/admin/users",
+            `${API_BASE_URL}/api/admin/users`,
             {
               credentials: "include",
             }
           ),
 
           fetch(
-            "http://localhost:5000/api/products/admin",
+            `${API_BASE_URL}/api/products/admin`,
             {
               credentials: "include",
             }

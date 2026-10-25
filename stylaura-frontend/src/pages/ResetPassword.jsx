@@ -1,8 +1,9 @@
+import API_BASE_URL from "../api";
 
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-const API_URL = "http://localhost:5000/api/password-reset";
+const API_URL = `${API_BASE_URL}/api/password-reset`;
 
 export default function ResetPassword() {
   const { token } = useParams();

@@ -1,3 +1,4 @@
+import API_BASE_URL from "../../api";
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 
@@ -20,7 +21,7 @@ function SkinResult() {
     const saveProfile = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/auth/skin-profile",
+          `${API_BASE_URL}/api/auth/skin-profile`,
           {
             method: "POST",
             headers: {

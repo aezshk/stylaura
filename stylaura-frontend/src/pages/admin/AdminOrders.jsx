@@ -1,3 +1,4 @@
+import API_BASE_URL from "../../api";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -18,7 +19,7 @@ function AdminOrders() {
       setError("");
 
       const response = await fetch(
-        "http://localhost:5000/api/orders/admin",
+        `${API_BASE_URL}/api/orders/admin`,
         {
           method: "GET",
           credentials: "include",
@@ -59,7 +60,7 @@ function AdminOrders() {
       setError("");
 
       const response = await fetch(
-        `http://localhost:5000/api/orders/admin/${orderId}/status`,
+        `${API_BASE_URL}/api/orders/admin/${orderId}/status`,
         {
           method: "PUT",
           headers: {

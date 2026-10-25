@@ -1,3 +1,4 @@
+import API_BASE_URL from "../api";
 import { useEffect, useState } from "react";
 
 import { Link, useNavigate } from "react-router-dom";
@@ -73,7 +74,7 @@ function Checkout() {
       setError("");
 
       const response = await fetch(
-        "http://localhost:5000/api/cart",
+        `${API_BASE_URL}/api/cart`,
         {
           method: "GET",
           credentials: "include",
@@ -198,7 +199,7 @@ function Checkout() {
       setPlacingOrder(true);
 
       const response = await fetch(
-        "http://localhost:5000/api/orders",
+        `${API_BASE_URL}/api/orders`,
         {
           method: "POST",
           headers: {

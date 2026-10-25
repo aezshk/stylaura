@@ -1,3 +1,4 @@
+import API_BASE_URL from "../../api";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -27,7 +28,7 @@ function AdminLogin() {
 
       if (loggedInUser.role !== "admin") {
         await fetch(
-          "http://localhost:5000/api/auth/logout",
+          `${API_BASE_URL}/api/auth/logout`,
           {
             method: "POST",
             credentials: "include",

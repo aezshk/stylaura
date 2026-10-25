@@ -1,3 +1,4 @@
+import API_BASE_URL from "../../api";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -30,7 +31,7 @@ function AdminGame() {
       setError("");
 
       const response = await fetch(
-        "http://localhost:5000/api/games/admin",
+        `${API_BASE_URL}/api/games/admin`,
         {
           credentials: "include",
         }
@@ -80,8 +81,8 @@ function AdminGame() {
       setMessage("");
 
       const url = editingId
-        ? `http://localhost:5000/api/games/admin/${editingId}`
-        : "http://localhost:5000/api/games/admin";
+        ? `${API_BASE_URL}/api/games/admin/${editingId}`
+        : `${API_BASE_URL}/api/games/admin`;
 
       const method = editingId
         ? "PUT"
@@ -195,7 +196,7 @@ function AdminGame() {
       setMessage("");
 
       const response = await fetch(
-        `http://localhost:5000/api/games/admin/${gameId}`,
+        `${API_BASE_URL}/api/games/admin/${gameId}`,
         {
           method: "DELETE",
           credentials: "include",

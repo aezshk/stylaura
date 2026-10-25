@@ -1,3 +1,4 @@
+import API_BASE_URL from "../api";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -136,7 +137,7 @@ function Game() {
     const fetchGames = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/games",
+          `${API_BASE_URL}/api/games`,
           {
             method: "GET",
             credentials: "include",
@@ -195,7 +196,7 @@ function Game() {
       setError("");
 
       const response = await fetch(
-        "http://localhost:5000/api/challenges/complete",
+        `${API_BASE_URL}/api/challenges/complete`,
         {
           method: "POST",
           headers: {

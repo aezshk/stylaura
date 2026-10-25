@@ -1,11 +1,12 @@
+import API_BASE_URL from "../../api";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../context/AuthContext";
 
-const API_URL = "http://localhost:5000/api/products";
-const IMAGE_API_URL = "http://localhost:5000/api/product-images";
-const BACKEND_URL = "http://localhost:5000";
+const API_URL = `${API_BASE_URL}/api/products`;
+const IMAGE_API_URL = `${API_BASE_URL}/api/product-images`;
+const BACKEND_URL = `${API_BASE_URL}`;
 
 const emptyForm = {
   name: "",

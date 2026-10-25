@@ -1,8 +1,9 @@
+import API_BASE_URL from "../api";
 import { useEffect, useState } from "react";
 
 import { Link } from "react-router-dom";
 
-const CART_URL = "http://localhost:5000/api/cart";
+const CART_URL = `${API_BASE_URL}/api/cart`;
 
 function Cart() {
   const [cart, setCart] = useState(null);

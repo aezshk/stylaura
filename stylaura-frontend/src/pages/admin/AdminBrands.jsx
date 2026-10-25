@@ -1,3 +1,4 @@
+import API_BASE_URL from "../../api";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -29,7 +30,7 @@ function AdminBrands() {
       setError("");
 
       const response = await fetch(
-        "http://localhost:5000/api/admin/brands",
+        `${API_BASE_URL}/api/admin/brands`,
         {
           credentials: "include",
         }
@@ -77,8 +78,8 @@ function AdminBrands() {
       setMessage("");
 
       const url = editingId
-        ? `http://localhost:5000/api/admin/brands/${editingId}`
-        : "http://localhost:5000/api/admin/brands";
+        ? `${API_BASE_URL}/api/admin/brands/${editingId}`
+        : `${API_BASE_URL}/api/admin/brands`;
 
       const method = editingId
         ? "PUT"
@@ -186,7 +187,7 @@ function AdminBrands() {
       setMessage("");
 
       const response = await fetch(
-        `http://localhost:5000/api/admin/brands/${brandId}`,
+        `${API_BASE_URL}/api/admin/brands/${brandId}`,
         {
           method: "DELETE",
           credentials: "include",

@@ -1,3 +1,4 @@
+import API_BASE_URL from "../../api";
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
@@ -17,7 +18,7 @@ function HairResult() {
     const saveProfile = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/auth/hair-profile",
+          `${API_BASE_URL}/api/auth/hair-profile`,
           {
             method: "POST",
             headers: {

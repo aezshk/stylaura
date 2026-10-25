@@ -1,3 +1,4 @@
+import API_BASE_URL from "../../api";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -36,7 +37,7 @@ function AdminDashboard() {
     const loadDashboard = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/admin/dashboard",
+          `${API_BASE_URL}/api/admin/dashboard`,
           {
             method: "GET",
             credentials: "include",

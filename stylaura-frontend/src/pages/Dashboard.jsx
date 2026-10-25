@@ -1,9 +1,10 @@
+import API_BASE_URL from "../api";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = `${API_BASE_URL}/api`;
 
 function Dashboard() {
   const { user } = useAuth();
