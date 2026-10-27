@@ -111,7 +111,7 @@ const loginUser = async (req, res) => {
         secure:
           process.env.NODE_ENV ===
           "production",
-        sameSite: "lax",
+         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         maxAge:
           7 *
           24 *
@@ -295,7 +295,7 @@ const logoutUser = async (
         secure:
           process.env.NODE_ENV ===
           "production",
-        sameSite: "lax",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       }
     );
 
