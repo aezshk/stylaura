@@ -2,42 +2,47 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
+const isProduction = process.env.NODE_ENV === "production";
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
+  path: "/",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+};
+
+// REGISTER USER
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const name = req.body.name?.trim();
+    const email = req.body.email?.trim().toLowerCase();
+    const password = req.body.password;
 
     if (!name || !email || !password) {
       return res.status(400).json({
-        message:
-          "Please provide name, email and password.",
+        message: "Please provide name, email and password.",
       });
     }
 
-    const existingUser = await User.findOne({
-      email: email.toLowerCase(),
-    });
+    const existingUser = await User.findOne({ email });
 
     if (existingUser) {
       return res.status(400).json({
-        message:
-          "An account with this email already exists.",
+        message: "An account with this email already exists.",
       });
     }
 
-    const hashedPassword = await bcrypt.hash(
-      password,
-      10
-    );
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
       name,
-      email: email.toLowerCase(),
+      email,
       password: hashedPassword,
     });
 
-    res.status(201).json({
-      message:
-        "Account created successfully.",
+    return res.status(201).json({
+      message: "Account created successfully.",
       user: {
         id: user._id,
         name: user.name,
@@ -45,51 +50,57 @@ const registerUser = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(
-      "Registration error:",
-      error.message
-    );
+    console.error("Registration error:", error.message);
 
-    res.status(500).json({
-      message:
-        "Server error during registration.",
+    if (error.code === 11000) {
+      return res.status(409).json({
+        message: "An account with this email already exists.",
+      });
+    }
+
+    return res.status(500).json({
+      message: "Server error during registration.",
     });
   }
 };
 
-
+// LOGIN USER
 const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const email = req.body.email?.trim().toLowerCase();
+    const password = req.body.password;
 
     if (!email || !password) {
       return res.status(400).json({
-        message:
-          "Please provide email and password.",
+        message: "Please provide email and password.",
       });
     }
 
-    const user = await User.findOne({
-      email: email.toLowerCase(),
-    });
+    if (!process.env.JWT_SECRET) {
+      console.error("Login configuration error: JWT_SECRET is missing.");
 
+      return res.status(500).json({
+        message: "Authentication service is not configured correctly.",
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    // Use the same response for an unknown email or incorrect password.
     if (!user) {
       return res.status(401).json({
-        message:
-          "Invalid email or password.",
+        message: "Invalid email or password.",
       });
     }
 
-    const passwordMatch =
-      await bcrypt.compare(
-        password,
-        user.password
-      );
+    const passwordMatch = await bcrypt.compare(
+      password,
+      user.password
+    );
 
     if (!passwordMatch) {
       return res.status(401).json({
-        message:
-          "Invalid email or password.",
+        message: "Invalid email or password.",
       });
     }
 
@@ -103,27 +114,10 @@ const loginUser = async (req, res) => {
       }
     );
 
-    res.cookie(
-      "stylauraToken",
-      token,
-      {
-        httpOnly: true,
-        secure:
-          process.env.NODE_ENV ===
-          "production",
-         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge:
-          7 *
-          24 *
-          60 *
-          60 *
-          1000,
-      }
-    );
+    res.cookie("stylauraToken", token, cookieOptions);
 
-    res.status(200).json({
-      message:
-        "Login successful.",
+    return res.status(200).json({
+      message: "Login successful.",
       user: {
         id: user._id,
         name: user.name,
@@ -132,23 +126,16 @@ const loginUser = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(
-      "Login error:",
-      error.message
-    );
+    console.error("Login error:", error.message);
 
-    res.status(500).json({
-      message:
-        "Server error during login.",
+    return res.status(500).json({
+      message: "Server error during login.",
     });
   }
 };
 
-
-const saveSkinProfile = async (
-  req,
-  res
-) => {
+// SAVE SKIN PROFILE
+const saveSkinProfile = async (req, res) => {
   try {
     const {
       image,
@@ -163,37 +150,27 @@ const saveSkinProfile = async (
       skinType: skinType || null,
       hydration: hydration || null,
       texture: texture || null,
-      sensitivity:
-        sensitivity || null,
+      sensitivity: sensitivity || null,
       updatedAt: new Date(),
     };
 
     await req.user.save();
 
-    res.status(200).json({
-      message:
-        "Skin profile saved successfully.",
-      skinProfile:
-        req.user.skinProfile,
+    return res.status(200).json({
+      message: "Skin profile saved successfully.",
+      skinProfile: req.user.skinProfile,
     });
   } catch (error) {
-    console.error(
-      "Save skin profile error:",
-      error.message
-    );
+    console.error("Save skin profile error:", error.message);
 
-    res.status(500).json({
-      message:
-        "Unable to save skin profile.",
+    return res.status(500).json({
+      message: "Unable to save skin profile.",
     });
   }
 };
 
-
-const saveHairProfile = async (
-  req,
-  res
-) => {
+// SAVE HAIR PROFILE
+const saveHairProfile = async (req, res) => {
   try {
     const {
       image,
@@ -210,30 +187,21 @@ const saveHairProfile = async (
 
     await req.user.save();
 
-    res.status(200).json({
-      message:
-        "Hair profile saved successfully.",
-      hairProfile:
-        req.user.hairProfile,
+    return res.status(200).json({
+      message: "Hair profile saved successfully.",
+      hairProfile: req.user.hairProfile,
     });
   } catch (error) {
-    console.error(
-      "Save hair profile error:",
-      error.message
-    );
+    console.error("Save hair profile error:", error.message);
 
-    res.status(500).json({
-      message:
-        "Unable to save hair profile.",
+    return res.status(500).json({
+      message: "Unable to save hair profile.",
     });
   }
 };
 
-
-const saveColourProfile = async (
-  req,
-  res
-) => {
+// SAVE COLOUR PROFILE
+const saveColourProfile = async (req, res) => {
   try {
     const {
       image,
@@ -246,76 +214,50 @@ const saveColourProfile = async (
 
     req.user.colourProfile = {
       image: image || null,
-      undertone:
-        undertone || null,
-      contrast:
-        contrast || null,
-      season:
-        season || null,
-      bestColours:
-        bestColours || [],
-      avoidColours:
-        avoidColours || [],
+      undertone: undertone || null,
+      contrast: contrast || null,
+      season: season || null,
+      bestColours: bestColours || [],
+      avoidColours: avoidColours || [],
       updatedAt: new Date(),
     };
 
     await req.user.save();
 
-    res.status(200).json({
-      message:
-        "Colour profile saved successfully.",
-      colourProfile:
-        req.user.colourProfile,
+    return res.status(200).json({
+      message: "Colour profile saved successfully.",
+      colourProfile: req.user.colourProfile,
     });
   } catch (error) {
-    console.error(
-      "Save colour profile error:",
-      error.message
-    );
+    console.error("Save colour profile error:", error.message);
 
-    res.status(500).json({
-      message:
-        "Unable to save colour profile.",
+    return res.status(500).json({
+      message: "Unable to save colour profile.",
     });
   }
 };
 
-
-const logoutUser = async (
-  req,
-  res
-) => {
+// LOGOUT USER
+const logoutUser = async (req, res) => {
   try {
-    res.cookie(
-      "stylauraToken",
-      "",
-      {
-        httpOnly: true,
-        expires: new Date(0),
-        secure:
-          process.env.NODE_ENV ===
-          "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      }
-    );
+    res.clearCookie("stylauraToken", {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      path: "/",
+    });
 
-    res.status(200).json({
-      message:
-        "Logout successful.",
+    return res.status(200).json({
+      message: "Logout successful.",
     });
   } catch (error) {
-    console.error(
-      "Logout error:",
-      error.message
-    );
+    console.error("Logout error:", error.message);
 
-    res.status(500).json({
-      message:
-        "Server error during logout.",
+    return res.status(500).json({
+      message: "Server error during logout.",
     });
   }
 };
-
 
 module.exports = {
   registerUser,
