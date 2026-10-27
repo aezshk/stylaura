@@ -6,10 +6,6 @@
       "destination": "https://stylaura-backend.onrender.com/api/:path*"
     },
     {
-      "source": "/products/:path*",
-      "destination": "https://stylaura-backend.onrender.com/products/:path*"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
