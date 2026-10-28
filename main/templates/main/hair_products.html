@@ -1,0 +1,108 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<<div class="navbar">
+
+    <!-- LEFT -->
+    <div class="nav-left">
+        <a href="javascript:history.back()" class="nav-back">←</a>
+        <span class="logo">STYLAURA</span>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="nav-right">
+        {% if user.is_authenticated %}
+            <span class="nav-user">👤 {{ user.username }}</span>
+            <a href="/cart/" class="nav-btn">🛒 Cart</a>
+            <a href="/logout/" class="nav-btn logout">Logout</a>
+        {% else %}
+            <a href="/login2/" class="nav-btn">Login</a>
+        {% endif %}
+    </div>
+
+</div>
+
+<div class="page-wrapper">
+
+    <!-- TITLE -->
+    <h1 class="main-title">✨ Your Personalized Hair Routine ✨</h1>
+
+    <!-- VIEW CART BUTTON -->
+    <div class="top-bar">
+        <a href="{% url 'cart' %}" class="view-cart-btn">
+            🛒 View Cart
+        </a>
+    </div>
+
+    <!-- 🔥 TOP PRODUCT -->
+    {% if top_product %}
+    <div class="top-global">
+        <h2>✨ Top Recommended For You</h2>
+
+        <img src="{{ top_product.image }}" class="top-img">
+
+        <h3>{{ top_product.name }}</h3>
+
+        <p>₹{{ top_product.price }} | ⭐ {{ top_product.rating }}</p>
+
+        <a href="{% url 'add_to_cart' top_product.id %}" class="add-cart-btn">
+            Add to Cart
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- 🧴 ROUTINES -->
+    <div class="tier-container">
+
+        {% for tier, data in routines.items %}
+        <div class="tier-card">
+
+            <h2>{{ tier|title }} Routine</h2>
+
+            <!-- STEPS -->
+            <div class="steps">
+                {% for step in data.routine %}
+                    <span>{{ step }}</span>
+                {% endfor %}
+            </div>
+
+            <!-- PRODUCTS -->
+            <div class="products-grid">
+
+                {% for p in data.products %}
+                <div class="product-card">
+
+                    <!-- IMAGE -->
+                    <img src="{{ p.item.image }}" class="product-img">
+
+                    <!-- NAME -->
+                    <h4>{{ p.item.name }}</h4>
+
+                    <!-- STEP -->
+                    <p class="type">{{ p.step }}</p>
+
+                    <!-- PRICE -->
+                    <p class="price">₹{{ p.item.price }}</p>
+
+                    <!-- RATING -->
+                    <p>⭐ {{ p.item.rating }}</p>
+
+                    <!-- BADGE -->
+                    <span class="badge">{{ p.item.description }}</span>
+
+                    <!-- ADD TO CART -->
+                    <a href="{% url 'add_to_cart' p.item.id %}" class="add-cart-btn">
+                        Add to Cart
+                    </a>
+
+                </div>
+                {% endfor %}
+
+            </div>
+
+        </div>
+        {% endfor %}
+
+    </div>
+
+</div>

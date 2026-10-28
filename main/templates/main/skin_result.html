@@ -1,0 +1,143 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Skin Report</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<div class="global-back">
+    <a href="javascript:history.length > 1 ? history.back() : '/'" class="back-btn">
+        ← Back
+    </a>
+</div>
+<body>
+
+<div class="page-wrapper">
+    <div class="sparkles"></div>
+
+    <div class="dashboard-card">
+
+        <div class="dashboard-header">
+            <h1>AI Dermatology Report</h1>
+            <p>Advanced facial skin assessment</p>
+        </div>
+
+        {% if image_url %}
+        <div style="text-align:center; margin-bottom:30px;">
+            <img src="{{ image_url }}" width="420"
+                 style="border-radius:20px; box-shadow:0 20px 40px rgba(0,0,0,0.2);">
+        </div>
+        {% endif %}
+
+        {% if result %}
+
+        <h3>Skin Health Metrics</h3>
+
+        <!-- 🔴 REDNESS -->
+        <p><strong>Redness Level:</strong> {{ result.redness }}%</p>
+        <div class="progress-bar">
+            <div class="progress-inner redness" data-value="{{ result.redness }}"></div>
+        </div>
+
+        <br>
+
+        <!-- 🟤 PIGMENTATION -->
+        <p><strong>Pigmentation:</strong> {{ result.dark_spots }}%</p>
+        <div class="progress-bar">
+            <div class="progress-inner pigmentation" data-value="{{ result.dark_spots }}"></div>
+        </div>
+
+        <br>
+
+        <!-- 🌸 TEXTURE -->
+        <p><strong>Texture Irregularity:</strong> {{ result.texture }}%</p>
+        <div class="progress-bar">
+            <div class="progress-inner texture" data-value="{{ result.texture }}"></div>
+        </div>
+
+        <hr style="margin:30px 0;">
+
+        <h3>AI Dermatology Summary</h3>
+
+        {% if result.redness > 30 %}
+            <p>• Mild inflammation detected. Use calming ingredients.</p>
+        {% endif %}
+
+        {% if result.dark_spots > 25 %}
+            <p>• Pigmentation detected. Brightening serums recommended.</p>
+        {% endif %}
+
+        {% if result.texture > 40 %}
+            <p>• Uneven texture detected. Gentle exfoliation advised.</p>
+        {% endif %}
+
+        {% endif %}
+
+        <!-- RESULT BUTTON -->
+        <div class="result-section">
+
+            <h2>Your Analysis Result</h2>
+            <p>{{ result }}</p>
+
+            <div class="product-link">
+
+            {% if user.is_authenticated %}
+                <a href="{% url 'products' %}" class="primary-btn">
+                    View Recommended Products
+                </a>
+            {% else %}
+                <a href="/login2/?next=/products/" class="primary-btn">
+                    Login to View Recommendations
+                </a>
+            {% endif %}
+
+            </div>
+
+        </div>
+
+        <br>
+
+        <a href="{% url 'skin' %}" class="primary-btn">
+            Analyze Again
+        </a>
+
+    </div>
+</div>
+
+<!-- 💎 STYLE -->
+<style>
+.progress-bar {
+    width: 100%;
+    height: 14px;
+    border-radius: 20px;
+    background: #f2d6da;
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+.progress-inner {
+    height: 100%;
+    width: 0%;
+    border-radius: 20px;
+    transition: width 1.2s ease;
+}
+
+.redness { background: #b76e79; }
+.pigmentation { background: #a56e79; }
+.texture { background: #c07a84; }
+</style>
+
+<!-- ✨ SCRIPT -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll(".progress-inner").forEach(bar => {
+        let value = bar.getAttribute("data-value");
+        setTimeout(() => {
+            bar.style.width = value + "%";
+        }, 200);
+    });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,92 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hair AI Report</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<div class="global-back">
+    <a href="javascript:history.length > 1 ? history.back() : '/'" class="back-btn">
+        ← Back
+    </a>
+</div>
+<body>
+
+<div class="top-nav">
+    <a href="/login2/" class="nav-btn">Login</a>
+</div>
+
+<div class="page-wrapper">
+<div class="sparkles"></div>
+
+<div class="dashboard-card">
+
+    <h1>💇 AI Hair Analysis Report</h1>
+
+    <!-- IMAGE -->
+    {% if image_url %}
+    <div style="text-align:center; margin-bottom:30px;">
+        <img src="{{ image_url }}" width="400"
+             style="border-radius:20px; box-shadow:0 20px 40px rgba(0,0,0,0.2);">
+    </div>
+    {% endif %}
+
+    <!-- RESULT -->
+    {% if result %}
+
+    <div class="result-section">
+
+        <h3>Hair Health Metrics</h3>
+
+        <p><strong>Hair Density:</strong> {{ result.density }}%</p>
+        <p><strong>Scalp:</strong> {{ result.scalp_label }}</p>
+        <p><strong>Dandruff:</strong> {{ result.dandruff_label }}</p>
+        <p><strong>Texture Quality:</strong> {{ result.texture }}%</p>
+
+        <hr>
+
+        <h3>AI Summary</h3>
+
+        {% if result.scalp_visibility > 30 %}
+            <p>• Possible hair thinning detected.</p>
+        {% else %}
+            <p>• Scalp coverage looks healthy.</p>
+        {% endif %}
+
+        {% if result.dandruff > 20 %}
+            <p>• Signs of dandruff or dryness detected.</p>
+        {% else %}
+            <p>• Scalp appears clean and balanced.</p>
+        {% endif %}
+
+        {% if result.texture < 40 %}
+            <p>• Hair texture appears weak or rough.</p>
+        {% else %}
+            <p>• Hair texture appears smooth and healthy.</p>
+        {% endif %}
+
+        <br>
+
+        <!-- ACTION BUTTON -->
+        <a href="{% url 'hair_products' %}" class="primary-btn">
+            Get Hair Routine
+        </a>
+
+    </div>
+
+    {% else %}
+        <p>No analysis data found.</p>
+    {% endif %}
+
+    <br><br>
+
+    <!-- RE-ANALYZE -->
+    <a href="{% url 'hair_ai' %}" class="primary-btn">
+        Analyze Again
+    </a>
+
+</div>
+</div>
+
+</body>
+</html>

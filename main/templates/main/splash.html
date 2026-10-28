@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+    <title>STYLAURA</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<div class="top-nav">
+    <a href="/login2/" class="nav-btn">Login</a>
+</div>
+<body>
+
+<!-- BACKGROUND SLIDER -->
+<div class="bg-slider">
+    <img src="{% static 'images/beauty1.jpeg' %}">
+    <img src="{% static 'images/beauty2.jpeg' %}">
+    <img src="{% static 'images/beauty3.jpeg' %}">
+    <img src="{% static 'images/beauty4.jpeg' %}">
+    <img src="{% static 'images/beauty5.jpeg' %}">
+</div>
+
+<!-- OVERLAY -->
+<div class="overlay"></div>
+
+<!-- CONTENT -->
+<section class="hero">
+    <div class="hero-content">
+
+        <h1 class="brand">STYLAURA</h1>
+
+        <p class="tagline">
+            Define your style. Enhance your aura.
+        </p>
+
+        <p class="subtext">
+            AI-powered beauty intelligence for skin, hair & colour.
+        </p>
+
+        <a href="{% url 'login' %}" class="start-btn">
+            Get Started
+        </a>
+
+    </div>
+</section>
+
+</body>
+</html>

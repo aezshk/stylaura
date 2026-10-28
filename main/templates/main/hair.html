@@ -1,0 +1,135 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hair Analysis</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<div class="global-back">
+    <a href="javascript:history.length > 1 ? history.back() : '/'" class="back-btn">
+        ← Back
+    </a>
+</div>
+<body>
+<div class="top-nav">
+    <a href="/login2/" class="nav-btn">Login</a>
+</div>
+<div class="page-wrapper">
+    <div class="sparkles"></div>
+    
+    <div class="dashboard-card">
+
+        <h1>Hair Analysis</h1>
+        <p>Analyze hair density, scalp visibility & texture</p>
+        {% if error %}
+            <p style="color:red; font-weight:600;">{{ error }}</p>
+        {% endif %}
+
+
+        <form method="POST" enctype="multipart/form-data" action="{% url 'hair_ai' %}">
+            {% csrf_token %}
+<h2>Hair Type</h2>
+
+<select name="hair_type" required>
+    <option value="" disabled selected>Select your hair type</option>
+    <option value="straight">Straight</option>
+    <option value="wavy">Wavy</option>
+    <option value="curly">Curly</option>
+    <option value="coily">Coily</option>
+</select>
+<h2>Hair Concerns</h2>
+
+<label><input type="checkbox" name="concerns" value="hair fall"> Hair Fall</label><br>
+<label><input type="checkbox" name="concerns" value="dandruff"> Dandruff</label><br>
+<label><input type="checkbox" name="concerns" value="dryness"> Dryness</label><br>
+<label><input type="checkbox" name="concerns" value="frizz"> Frizz</label><br>
+            <!-- CAMERA SECTION -->
+            <h2>AI Hair Scanner (Camera)</h2>
+
+            <div style="text-align:center; margin-bottom:20px;">
+                <video id="video" width="320" height="240" autoplay
+                    style="border-radius:15px; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+                </video>
+
+                <br><br>
+            <button type="button" onclick="captureAndSubmit()" class="primary-btn">
+                 Capture & Analyze
+            </button>
+
+                <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+
+                <!-- Hidden input -->
+                <input type="hidden" name="captured_image" id="captured_image">
+            </div>
+
+            <hr style="margin:30px 0;">
+
+            <!-- UPLOAD SECTION -->
+            <h2>Upload Image</h2>
+
+            <input type="file" name="image" accept="image/*">
+
+            <br><br>
+
+            <button type="submit" class="primary-btn">
+                Analyze Hair
+            </button>
+
+        </form>
+
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    const video = document.getElementById("video");
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("Camera not supported.");
+        return;
+    }
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function(stream) {
+            video.srcObject = stream;
+        })
+        .catch(function(error) {
+            alert("Camera access denied.");
+        });
+});
+
+function captureAndSubmit() {
+
+    const canvas = document.getElementById("canvas");
+    const video = document.getElementById("video");
+    const context = canvas.getContext("2d");
+
+    // ✅ CRITICAL FIX (match video size)
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const imageData = canvas.toDataURL("image/png");
+
+    // ✅ safety check
+    if (!imageData || imageData.length < 1000) {
+        alert("Camera not ready. Please try again.");
+        return;
+    }
+
+    // set hidden input
+    document.getElementById("captured_image").value = imageData;
+
+    // OPTIONAL preview
+    video.style.display = "none";
+    canvas.style.display = "block";
+
+    // 🔥 auto submit
+    document.querySelector("form").submit();
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,92 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Colour Analysis</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<div class="global-back">
+    <a href="javascript:history.length > 1 ? history.back() : '/'" class="back-btn">
+        ← Back
+    </a>
+</div>
+<body>
+<div class="top-nav">
+    <a href="/login2/" class="nav-btn">Login</a>
+</div>
+<div class="page-wrapper">
+    <div class="sparkles"></div>
+    <div class="dashboard-card">
+
+        <div class="dashboard-header">
+            <h1>AI Colour Analysis</h1>
+            <p>Upload or capture your photo to detect your undertone</p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- CAMERA SECTION -->
+            <h3>Use Camera</h3>
+
+            <div style="text-align:center; margin-bottom:20px;">
+                <video id="video" width="320" height="240" autoplay
+                    style="border-radius:15px; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+                </video>
+
+                <br><br>
+
+                <button type="button" onclick="captureImage()" class="primary-btn">
+                    Capture Photo
+                </button>
+
+                <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+
+                <input type="hidden" name="captured_image" id="captured_image">
+            </div>
+
+            <hr style="margin:30px 0;">
+
+            <!-- UPLOAD SECTION -->
+            <h3>Or Upload Image</h3>
+
+            <input type="file" name="image" accept="image/*">
+
+            <br><br>
+
+            <button type="submit" class="primary-btn">
+                Analyze Colour
+            </button>
+
+        </form>
+
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const video = document.getElementById("video");
+
+    if (!navigator.mediaDevices) return;
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => video.srcObject = stream)
+        .catch(err => console.log(err));
+});
+
+function captureImage() {
+    const canvas = document.getElementById("canvas");
+    const video = document.getElementById("video");
+    const context = canvas.getContext("2d");
+
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imageData = canvas.toDataURL("image/png");
+
+    document.getElementById("captured_image").value = imageData;
+
+    alert("Photo captured! Now click Analyze Colour.");
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,59 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<div class="global-back">
+    <a href="javascript:history.length > 1 ? history.back() : '/'" class="back-btn">
+        ← Back
+    </a>
+</div>
+<div class="page-wrapper">
+<div class="sparkles"></div>
+
+<h1 class="orders-title">📦 My Orders</h1>
+
+<div class="orders-container">
+
+    {% for order in orders %}
+    <div class="order-card">
+
+        <div class="order-header">
+            <div>
+                <strong>Order #{{ order.id }}</strong>
+                <p class="order-date">{{ order.created_at }}</p>
+            </div>
+
+            <span class="order-status">
+                {{ order.status }}
+            </span>
+        </div>
+
+        <p class="order-total">Total: ₹{{ order.total_amount }}</p>
+
+        <div class="order-products">
+
+            {% for item in order.orderitem_set.all %}
+            <div class="product-row">
+
+                {% if item.product.image %}
+                    <img src="{{ item.product.image.url }}">
+                {% else %}
+                    <img src="{% static 'default.jpg' %}">
+                {% endif %}
+
+                <div>
+                    <p class="product-name">{{ item.product.name }}</p>
+                    <p class="qty">Qty: {{ item.quantity }}</p>
+                </div>
+
+            </div>
+            {% endfor %}
+
+        </div>
+
+    </div>
+    {% endfor %}
+
+</div>
+</div>
+
+</div>

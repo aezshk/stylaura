@@ -1,0 +1,200 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users | STYLAURA</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+<!-- BACK BUTTON -->
+<div class="global-back">
+    <a href="javascript:history.length > 1 ? history.back() : '/'" class="back-btn">
+        ← Back
+    </a>
+</div>
+
+
+<!-- PAGE -->
+<div class="page-wrapper">
+
+    <div class="sparkles"></div>
+
+    <div class="dashboard-card">
+
+        <!-- HEADER -->
+        <div class="dashboard-header">
+
+            <h1>
+                Manage Users
+            </h1>
+
+            <a href="{% url 'admin_dashboard' %}"
+               style="
+               display:inline-block;
+               margin-top:10px;
+               padding:8px 25px;
+               background:#b76e79;
+               color:white;
+               border-radius:20px;
+               text-decoration:none;
+               ">
+               Back to Dashboard
+            </a>
+
+        </div>
+
+
+        <!-- USERS TABLE -->
+        <table style="
+               width:100%;
+               margin-top:20px;
+               background:#fffaf7;
+               border-radius:20px;
+               overflow:hidden;
+               border-collapse:collapse;
+               ">
+
+            <!-- TABLE HEADER -->
+            <tr style="
+                background:#e7cfcf;
+                font-weight:600;
+                ">
+
+                <th style="padding:14px;">Username</th>
+
+                <th style="padding:14px;">Email</th>
+
+                <th style="padding:14px;">Role</th>
+
+                <th style="padding:14px;">Actions</th>
+
+            </tr>
+
+
+            <!-- USERS -->
+            {% for user in page_obj %}
+
+            <tr style="border-bottom:1px solid #f1dede;">
+
+                <!-- USERNAME -->
+                <td style="padding:14px;">
+                    {{ user.username }}
+                </td>
+
+                <!-- EMAIL -->
+                <td style="padding:14px;">
+                    {{ user.email }}
+                </td>
+
+                <!-- ROLE -->
+                <td style="padding:14px;">
+
+                    {% if user.is_superuser %}
+
+                        <span style="
+                              color:#b76e79;
+                              font-weight:700;
+                              ">
+                              Admin
+                        </span>
+
+                    {% else %}
+
+                        User
+
+                    {% endif %}
+
+                </td>
+
+
+                <!-- ACTIONS -->
+                <td style="padding:14px;">
+
+                    <!-- Promote / Demote -->
+                    <a href="{% url 'toggle_admin' user.id %}"
+                       style="
+                       background:#7b4b4b;
+                       color:white;
+                       padding:6px 14px;
+                       border-radius:15px;
+                       text-decoration:none;
+                       margin-right:6px;
+                       display:inline-block;
+                       ">
+
+                       {% if user.is_superuser %}
+                           Demote
+                       {% else %}
+                           Promote
+                       {% endif %}
+
+                    </a>
+
+
+                    <!-- EDIT -->
+                    <a href="{% url 'edit_user' user.id %}"
+                       style="
+                       background:#9b6b6b;
+                       color:white;
+                       padding:6px 14px;
+                       border-radius:15px;
+                       text-decoration:none;
+                       margin-right:6px;
+                       display:inline-block;
+                       ">
+                       Edit
+                    </a>
+
+
+                    <!-- DELETE -->
+                    <a href="{% url 'delete_user' user.id %}"
+                       onclick="return confirm('Are you sure you want to delete this user?');"
+                       style="
+                       background:#b76e79;
+                       color:white;
+                       padding:6px 14px;
+                       border-radius:15px;
+                       text-decoration:none;
+                       display:inline-block;
+                       ">
+                       Delete
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <!-- EMPTY -->
+            <tr>
+
+                <td colspan="4"
+                    style="
+                    padding:20px;
+                    text-align:center;
+                    color:#666;
+                    ">
+
+                    No users found
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+    </div>
+
+</div>
+
+</body>
+</html>

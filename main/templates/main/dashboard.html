@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<div class="navbar">
+
+    <!-- LEFT -->
+    <div class="nav-left">
+        <a href="javascript:history.back()" class="nav-back">←</a>
+        <span class="logo">STYLAURA</span>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="nav-right">
+        {% if user.is_authenticated %}
+            <span class="nav-user">👤 {{ user.username }}</span>
+            <a href="/cart/" class="nav-btn">🛒 Cart</a>
+            <a href="/logout/" class="nav-btn logout">Logout</a>
+        {% else %}
+            <a href="/login2/" class="nav-btn">Login</a>
+        {% endif %}
+    </div>
+
+</div>
+</div>
+<body>
+    
+
+<div class="page-wrapper">
+    <div class="sparkles"></div>
+    <div class="dashboard-card">
+
+        <div class="dashboard-header">
+            <h2>Welcome {{ name }}</h2>
+
+    {% if profile %}
+    <p>Mobile: {{ profile.mobile }}</p>
+    <p>Age: {{ profile.age }}</p>
+    <p>Role: {{ profile.role }}</p>
+    {% endif %}
+
+        <div class="analysis-cards">
+
+            <a href="{% url 'skin' %}" class="analysis-card">
+                <h3>Skin Analysis</h3>
+                <p>Check skin type & concerns</p>
+            </a>
+            
+
+
+            <a href="{% url 'hair' %}" class="analysis-card">
+                <h3>Hair Analysis</h3>
+                <p>Hair fall & scalp health</p>
+            </a>
+
+            <a href="{% url 'colour' %}" class="analysis-card">
+                <h3>Colour Suggestions</h3>
+                <p>Best shades for you</p>
+            </a>
+
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
+
+

@@ -1,0 +1,153 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Colour Recommendations</title>
+
+    <!-- 🌸 FONTS -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<div class="navbar">
+
+    <!-- LEFT -->
+    <div class="nav-left">
+        <a href="javascript:history.back()" class="nav-back">←</a>
+        <span class="logo">STYLAURA</span>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="nav-right">
+        {% if user.is_authenticated %}
+            <span class="nav-user">👤 {{ user.username }}</span>
+            <a href="/cart/" class="nav-btn">🛒 Cart</a>
+            <a href="/logout/" class="nav-btn logout">Logout</a>
+        {% else %}
+            <a href="/login2/" class="nav-btn">Login</a>
+        {% endif %}
+    </div>
+
+</div>
+<body>
+
+<div class="page-wrapper">
+
+    <h1 class="title">Your Colour Recommendations</h1>
+
+    <div class="analysis-box">
+
+    <!-- 🎯 DETECTED UNDERTONE -->
+    <h2 class="undertone-text">
+        Detected Undertone: 
+        <span class="undertone-badge">
+            {{ undertone }}
+        </span>
+    </h2>
+
+    <!-- 💡 EXPLANATION -->
+    <p class="undertone-desc">
+        Based on your skin tone analysis, your undertone appears 
+        <strong>{{ undertone }}</strong>.
+    </p>
+
+    <!-- 🔄 MANUAL CORRECTION -->
+    <div class="correction-box">
+        <p>Not correct? Choose:</p>
+
+        <a href="{% url 'set_undertone' 'warm' %}" class="btn-option">Warm</a>
+        <a href="{% url 'set_undertone' 'cool' %}" class="btn-option">Cool</a>
+        <a href="{% url 'set_undertone' 'neutral' %}" class="btn-option">Neutral</a>
+    </div>
+
+</div>
+
+    <div class="colour-card">
+
+        <!-- 💄 LIPSTICK -->
+        <div class="section">
+            <h3>💄 Lipstick Shades</h3>
+            <div class="color-row">
+                {% for c in lipstick %}
+                <div class="color-box">
+                    <div class="circle" data-color="{{ c.hex }}"></div>
+                    <p>{{ c.name }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- 🌸 BLUSH -->
+        <div class="section">
+            <h3>🌸 Blush</h3>
+            <div class="color-row">
+                {% for c in blush %}
+                <div class="color-box">
+                    <div class="circle" data-color="{{ c.hex }}"></div>
+                    <p>{{ c.name }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- 🎨 FOUNDATION -->
+        <div class="section">
+            <h3>🎨 Foundation</h3>
+            <p class="foundation-text">{{ foundation }}</p>
+        </div>
+
+        <!-- 👗 CLOTHES -->
+        <div class="section">
+            <h3>👗 Clothing Colours</h3>
+            <div class="color-row">
+                {% for c in clothes %}
+                <div class="color-box">
+                    <div class="circle" data-color="{{ c.hex }}"></div>
+                    <p>{{ c.name }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- 🔥 JS START -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    // 🎨 APPLY COLORS FROM DATA ATTRIBUTE
+    document.querySelectorAll(".circle").forEach(el => {
+        const color = el.getAttribute("data-color");
+        if (color) {
+            el.style.backgroundColor = color;
+        }
+    });
+
+    // ✨ FADE IN ANIMATION
+    const card = document.querySelector(".colour-card");
+    card.style.opacity = "0";
+    card.style.transform = "translateY(30px)";
+
+    setTimeout(() => {
+        card.style.transition = "0.6s ease";
+        card.style.opacity = "1";
+        card.style.transform = "translateY(0)";
+    }, 200);
+
+    // 💫 HOVER GLOW EFFECT (DYNAMIC)
+    document.querySelectorAll(".circle").forEach(el => {
+        el.addEventListener("mouseenter", () => {
+            el.style.boxShadow = "0 0 20px " + el.style.backgroundColor;
+        });
+        el.addEventListener("mouseleave", () => {
+            el.style.boxShadow = "";
+        });
+    });
+
+});
+</script>
+
+</body>
+</html>

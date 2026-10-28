@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Product</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<div class="global-back">
+    <a href="javascript:history.length > 1 ? history.back() : '/'" class="back-btn">
+        ← Back
+    </a>
+</div>
+<body>
+    
+    <div class="page-wrapper">
+    <div class="sparkles"></div>
+    <div class="dashboard-card">
+
+
+    <h2>Add Product</h2>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <input type="text" name="name" placeholder="Product Name" required>
+
+    <!-- ⚠️ IMPORTANT: CATEGORY MUST MATCH -->
+    <select name="category">
+        <option>Cleanser</option>
+        <option>Niacinamide</option>
+        <option>Vitamin C</option>
+        <option>Salicylic Acid</option>
+        <option>Alpha Arbutin</option>
+        <option>Moisturizer</option>
+        <option>Sunscreen</option>
+        <option>Soothing Serum</option>
+    </select>
+
+    <select name="tier">
+        <option value="budget">Budget</option>
+        <option value="medium">Medium</option>
+        <option value="luxury">Luxury</option>
+    </select>
+
+    <input type="number" name="price" placeholder="Price">
+
+    <textarea name="description" placeholder="Description"></textarea>
+
+    <input type="file" name="image">
+
+    <button type="submit">Add Product</button>
+</form>

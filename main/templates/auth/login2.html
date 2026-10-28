@@ -1,0 +1,237 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STYLAURA Login</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:'Poppins', sans-serif;
+        }
+
+        body{
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            background:linear-gradient(135deg,#f8dce3,#f4cfd8,#f7dfe5);
+            overflow:hidden;
+            position:relative;
+        }
+
+        /* SPARKLES */
+        body::before,
+        body::after{
+            content:'';
+            position:absolute;
+            width:300px;
+            height:300px;
+            border-radius:50%;
+            background:rgba(255,255,255,0.25);
+            filter:blur(80px);
+            animation:float 8s infinite ease-in-out;
+        }
+
+        body::before{
+            top:-80px;
+            left:-80px;
+        }
+
+        body::after{
+            bottom:-80px;
+            right:-80px;
+        }
+
+        @keyframes float{
+            0%{transform:translateY(0px);}
+            50%{transform:translateY(30px);}
+            100%{transform:translateY(0px);}
+        }
+
+        /* LOGIN CARD */
+        .login-card{
+            width:420px;
+            background:rgba(255,255,255,0.55);
+            backdrop-filter:blur(18px);
+            padding:45px;
+            border-radius:28px;
+            box-shadow:0 15px 40px rgba(0,0,0,0.12);
+            text-align:center;
+            position:relative;
+            z-index:2;
+            animation:fadeUp 0.8s ease;
+        }
+
+        @keyframes fadeUp{
+            from{
+                opacity:0;
+                transform:translateY(40px);
+            }
+            to{
+                opacity:1;
+                transform:translateY(0);
+            }
+        }
+
+        .brand{
+            font-size:32px;
+            font-weight:700;
+            color:#c56c86;
+            margin-bottom:8px;
+            letter-spacing:1px;
+        }
+
+        .subtitle{
+            color:#555;
+            margin-bottom:35px;
+            font-size:15px;
+        }
+
+        .input-group{
+            margin-bottom:20px;
+            text-align:left;
+        }
+
+        .input-group label{
+            display:block;
+            margin-bottom:8px;
+            color:#555;
+            font-size:14px;
+            font-weight:500;
+        }
+
+        .input-group input{
+            width:100%;
+            padding:14px 16px;
+            border:none;
+            border-radius:14px;
+            background:#fff;
+            box-shadow:0 4px 10px rgba(0,0,0,0.05);
+            outline:none;
+            transition:0.3s;
+            font-size:15px;
+        }
+
+        .input-group input:focus{
+            box-shadow:0 0 0 3px rgba(197,108,134,0.25);
+        }
+
+        .login-btn{
+            width:100%;
+            padding:15px;
+            border:none;
+            border-radius:14px;
+            background:linear-gradient(to right,#d96c88,#c56c86);
+            color:white;
+            font-size:16px;
+            font-weight:600;
+            cursor:pointer;
+            transition:0.3s;
+            margin-top:10px;
+        }
+
+        .login-btn:hover{
+            transform:translateY(-2px);
+            box-shadow:0 10px 20px rgba(197,108,134,0.3);
+        }
+
+        .bottom-text{
+            margin-top:22px;
+            color:#555;
+            font-size:14px;
+        }
+
+        .bottom-text a{
+            color:#c56c86;
+            font-weight:600;
+            text-decoration:none;
+        }
+
+        .bottom-text a:hover{
+            text-decoration:underline;
+        }
+
+        .back-btn{
+            position:absolute;
+            top:30px;
+            left:30px;
+            background:white;
+            padding:10px 22px;
+            border-radius:30px;
+            text-decoration:none;
+            color:#444;
+            box-shadow:0 4px 12px rgba(0,0,0,0.08);
+            font-weight:500;
+            transition:0.3s;
+        }
+
+        .back-btn:hover{
+            transform:translateX(-3px);
+        }
+
+        /* MOBILE */
+        @media(max-width:500px){
+
+            .login-card{
+                width:92%;
+                padding:35px 25px;
+            }
+
+            .brand{
+                font-size:26px;
+            }
+        }
+
+    </style>
+
+</head>
+<body>
+
+    <!-- BACK BUTTON -->
+    <a href="/" class="back-btn">← Back</a>
+
+    <!-- LOGIN CARD -->
+    <div class="login-card">
+
+        <h1 class="brand">STYLAURA</h1>
+
+        <p class="subtitle">
+            Login to continue your beauty journey 
+        </p>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="input-group">
+                <label>Username</label>
+                <input type="text" name="username" placeholder="Enter username" required>
+            </div>
+
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="Enter password" required>
+            </div>
+
+            <button type="submit" class="login-btn">
+                Login
+            </button>
+
+        </form>
+
+        <div class="bottom-text">
+            Don’t have an account?
+            <a href="{% url 'register' %}">Register</a>
+        </div>
+
+    </div>
+
+</body>
+</html>

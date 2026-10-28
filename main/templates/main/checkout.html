@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Checkout | STYLAURA</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+<div class="global-back">
+    <a href="javascript:history.back()" class="back-btn">← Back</a>
+</div>
+
+<div class="page-wrapper">
+    <div class="sparkles"></div>
+
+    <div class="checkout-card">
+
+        <h1>💳 Checkout</h1>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- 👤 USER DETAILS -->
+            <div class="form-group">
+                <input type="text" name="name" placeholder="Full Name" required>
+            </div>
+
+            <div class="form-group">
+                <input type="text" name="mobile" placeholder="Mobile Number" required>
+            </div>
+
+            <div class="form-group">
+                <textarea name="address" placeholder="Delivery Address" required></textarea>
+            </div>
+
+            <!-- 💰 TOTAL -->
+            <div class="total-box">
+                <h2>Total Amount</h2>
+                <p>₹{{ total }}</p>
+            </div>
+
+            <!-- 💳 PAYMENT -->
+            <div class="payment-options">
+                <button type="submit" class="primary-btn">
+                    💳 Pay Online
+                </button>
+
+                <button type="submit" name="cod" value="1" class="secondary-btn">
+                    🚚 Cash on Delivery
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>

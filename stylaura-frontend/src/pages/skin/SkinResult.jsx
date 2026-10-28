@@ -180,14 +180,9 @@ function SkinResult() {
           <em>your way.</em>
         </h1>
 
-        <p>
-          This free guide offers general skin-care suggestions. Your
-          uploaded photo has not been analyzed, and this guide cannot
-          diagnose a skin condition.
-        </p>
+        
 
         <p className="profile-save-status" role="note">
-          Free care guide · No paid AI service required
         </p>
 
         {saveStatus === "saved" && (

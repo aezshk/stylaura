@@ -1,0 +1,194 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<h2 class="admin-title">📦 All Orders</h2>
+<div class="global-back">
+    <a href="javascript:history.length > 1 ? history.back() : '/'" class="back-btn">
+        ← Back
+    </a>
+</div>
+<!-- ✅ BULK ACTIONS (OUTSIDE TABLE) -->
+<div class="bulk-actions">
+
+    <span id="selected-count">0 selected</span>
+
+    <button id="delete-btn" onclick="bulkDelete()" disabled>
+        🗑 Delete Selected
+    </button>
+
+    <select id="bulk-status">
+        <option value="">Update Status</option>
+        <option value="pending">Pending</option>
+        <option value="shipped">Shipped</option>
+        <option value="delivered">Delivered</option>
+    </select>
+
+    <button id="update-btn" onclick="bulkUpdate()" disabled>
+        Apply
+    </button>
+
+</div>
+
+<table class="orders-table">
+
+    <thead>
+        <tr>
+            <th><input type="checkbox" id="select-all"></th> <!-- ✅ checkbox column -->
+            <th>ID</th>
+            <th>User</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Products</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+    {% for order in orders %}
+        <tr>
+
+            <!-- ✅ checkbox -->
+            <td>
+                <input type="checkbox" class="order-checkbox" value="{{ order.id }}">
+            </td>
+
+            <td>#{{ order.id }}</td>
+            <td>{{ order.user.username }}</td>
+            <td>₹{{ order.total_amount }}</td>
+
+            <!-- STATUS DROPDOWN -->
+            <td>
+                <select class="status-dropdown" data-id="{{ order.id }}">
+                    <option value="pending" {% if order.status == "pending" %}selected{% endif %}>Pending</option>
+                    <option value="shipped" {% if order.status == "shipped" %}selected{% endif %}>Shipped</option>
+                    <option value="delivered" {% if order.status == "delivered" %}selected{% endif %}>Delivered</option>
+                </select>
+            </td>
+
+            <td>{{ order.created_at|date:"M d, Y • h:i A" }}</td>
+
+            <td>
+                {% for item in order.orderitem_set.all %}
+                    {{ item.product.name }} (x{{ item.quantity }}){% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </td>
+
+            <!-- DELETE -->
+            <td>
+                <form method="POST" action="{% url 'delete_order' order.id %}"
+                      onsubmit="return confirm('Delete this order?');">
+                    {% csrf_token %}
+                    <button type="submit" class="delete-btn">Delete</button>
+                </form>
+            </td>
+
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan="8">No orders found</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+
+</table>
+
+
+<script>
+
+// SELECT ALL
+document.getElementById("select-all").addEventListener("change", function() {
+    document.querySelectorAll(".order-checkbox").forEach(cb => {
+        cb.checked = this.checked;
+    });
+    updateUI();
+});
+
+// INDIVIDUAL CHECKBOX
+document.querySelectorAll(".order-checkbox").forEach(cb => {
+    cb.addEventListener("change", updateUI);
+});
+
+// UPDATE UI STATE
+function updateUI() {
+    let selected = document.querySelectorAll(".order-checkbox:checked").length;
+
+    document.getElementById("selected-count").innerText = selected + " selected";
+
+    document.getElementById("delete-btn").disabled = selected === 0;
+    document.getElementById("update-btn").disabled = selected === 0;
+}
+
+// GET IDS
+function getSelectedOrders() {
+    let ids = [];
+    document.querySelectorAll(".order-checkbox:checked").forEach(cb => {
+        ids.push(cb.value);
+    });
+    return ids;
+}
+
+// BULK DELETE
+function bulkDelete() {
+    let ids = getSelectedOrders();
+
+    fetch("/bulk-delete-orders/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify({ ids: ids })
+    })
+    .then(() => {
+        showToast("Orders deleted successfully");
+        setTimeout(() => location.reload(), 800);
+    });
+}
+
+// BULK UPDATE
+function bulkUpdate() {
+    let ids = getSelectedOrders();
+    let status = document.getElementById("bulk-status").value;
+
+    if (!status) {
+        showToast("Select a status first");
+        return;
+    }
+
+    fetch("/bulk-update-status/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify({ ids: ids, status: status })
+    })
+    .then(() => {
+        showToast("Status updated");
+        setTimeout(() => location.reload(), 800);
+    });
+}
+
+// TOAST FUNCTION
+function showToast(message) {
+    let toast = document.getElementById("toast");
+    toast.innerText = message;
+    toast.classList.add("show");
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+    }, 2000);
+}
+
+// CSRF
+function getCSRFToken() {
+    return document.cookie.split('; ')
+        .find(row => row.startsWith('csrftoken='))
+        ?.split('=')[1];
+}
+
+</script>
+</script>
+<div id="toast" class="toast"></div>

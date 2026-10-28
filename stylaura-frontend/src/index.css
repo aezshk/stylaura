@@ -41,3 +41,39 @@ img {
 #root {
   min-height: 100vh;
 }
+
+:root {
+  font-family: Arial, Helvetica, sans-serif;
+
+  --color-background: #F7F5EF;
+  --color-surface: #FFFFFF;
+  --color-text: #34362F;
+  --color-muted: #77776D;
+  --color-primary: #748B72;
+  --color-primary-dark: #586F57;
+  --color-border: #E1E2D8;
+
+  --color-sage: #DCE6D8;
+  --color-lavender: #E8E2F0;
+  --color-peach: #F3E2D3;
+  --color-ivory: #F7F5EF;
+
+  --page-width: 1440px;
+  --page-padding: clamp(16px, 4vw, 56px);
+  --section-gap: clamp(32px, 5vw, 72px);
+
+  --radius-small: 8px;
+  --radius-medium: 16px;
+  --radius-large: 24px;
+
+  --shadow-soft: 0 8px 28px rgba(52, 54, 47, 0.06);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-text);
+}

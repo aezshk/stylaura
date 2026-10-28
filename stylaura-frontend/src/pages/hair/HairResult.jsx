@@ -207,13 +207,9 @@ function HairResult() {
           <em>your way.</em>
         </h1>
 
-        <p>
-          Your free care guide is based on the hair type and concern you
-          selected. Your uploaded photo has not been analyzed.
-        </p>
+        
 
         <p className="profile-save-status" role="note">
-          Free guide · No paid AI service required
         </p>
 
         {saveStatus === "saved" && (

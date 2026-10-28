@@ -1,0 +1,156 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Skin Analysis</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<div class="global-back">
+    <a href="javascript:history.length > 1 ? history.back() : '/'" class="back-btn">
+        ← Back
+    </a>
+</div>
+<body>
+<div class="top-nav">
+    <a href="/login2/" class="nav-btn">Login</a>
+</div>
+<div class="page-wrapper">
+    <div class="sparkles"></div>
+    
+    <div class="dashboard-card">
+
+        <h1>Skin Analysis</h1>
+        <p>Select your skin concerns & scan your skin</p>
+
+        <form method="POST" enctype="multipart/form-data" action="{% url 'skin_ai' %}">
+
+            {% csrf_token %}
+
+            <!-- ================= SKIN OPTIONS ================= -->
+            <div class="options-grid">
+                {% for problem in skin_problems %}
+                <label class="option-box">
+                    <input type="checkbox" name="skin" value="{{ problem }}">
+                    <span>{{ problem }}</span>
+                </label>
+                {% endfor %}
+            </div>
+
+            <hr style="margin:30px 0;">
+
+            <!-- ================= CAMERA SECTION ================= -->
+            <h2>AI Skin Scanner (Camera)</h2>
+
+            <div style="text-align:center; margin-bottom:20px;">
+                <video id="video" width="320" height="240" autoplay
+                    style="border-radius:15px; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+                </video>
+
+                <br><br>
+
+                <button type="button" onclick="captureImage()" class="primary-btn">
+                    Capture Photo
+                </button>
+
+                <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+
+                <!-- Hidden input for captured image -->
+                <input type="hidden" name="captured_image" id="captured_image">
+            </div>
+
+            <hr style="margin:30px 0;">
+
+            <!-- ================= UPLOAD SECTION ================= -->
+            <h2>Upload Image</h2>
+
+            <input type="file" name="image" accept="image/*">
+
+            <br><br>
+
+            <button type="submit" class="primary-btn" onclick="showLoader()">
+                    Analyze Skin
+            </button>
+
+
+
+        </form>
+
+    </div>
+</div>
+
+<!-- ================= JAVASCRIPT ================= -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    const video = document.getElementById("video");
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("Camera not supported in this browser.");
+        return;
+    }
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function(stream) {
+            video.srcObject = stream;
+        })
+        .catch(function(error) {
+            alert("Camera access denied or not available.");
+            console.log(error);
+        });
+});
+
+function captureImage() {
+    const canvas = document.getElementById("canvas");
+    const video = document.getElementById("video");
+    const context = canvas.getContext("2d");
+
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const imageData = canvas.toDataURL("image/png");
+
+    document.getElementById("captured_image").value = imageData;
+
+    alert("Photo captured! Now click Analyze Skin.");
+}
+function showLoader() {
+    document.getElementById("aiLoader").style.display = "flex";
+}
+</script>
+ <!-- ================= AI LOADING OVERLAY ================= -->
+<div id="aiLoader" style="
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(255,247,243,0.95);
+    z-index:9999;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+">
+
+    <div style="
+        width:80px;
+        height:80px;
+        border:8px solid #f2d6da;
+        border-top:8px solid #b76e79;
+        border-radius:50%;
+        animation:spin 1s linear infinite;">
+    </div>
+
+    <p style="margin-top:20px; font-size:18px; color:#8b5e5e;">
+        AI Dermatology Engine Analyzing Skin...
+    </p>
+</div>
+
+<style>
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+
+</body>
+</html>

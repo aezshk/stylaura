@@ -1,11 +1,72 @@
 import API_BASE_URL from "../api";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import stylauraCatalog from "../data/stylauraProducts.json";
 
 const API_URL = `${API_BASE_URL}/api/products`;
 const RECOMMENDATION_URL =
   `${API_BASE_URL}/api/recommendations`;
 const CART_URL = `${API_BASE_URL}/api/cart`;
+
+function ProductImage({ product, isStylaura = product.isStylaura }) {
+  const [imageFailed, setImageFailed] = useState(false);
+
+  // STYLAURA products share one bottle image; partner brands keep their own image.
+  const imageSrc = product.image || (
+  isStylaura ? "/images/stylaura-bottle.png" : ""
+);
+
+  if (!imageSrc || imageFailed) {
+    return (
+      <div className="product-image product-image-fallback">
+        <div className="product-bottle-placeholder" aria-hidden="true">
+          <span className="placeholder-bottle-neck" />
+          <span className="placeholder-bottle-body">STYLAURA</span>
+        </div>
+        <span className="product-image-caption">
+          {product.brand || (isStylaura ? "STYLAURA" : "Product")}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="product-image">
+      <img
+        src={imageSrc}
+        alt={`${product.brand || "STYLAURA"} ${product.name || "product"}`}
+        loading="lazy"
+        onError={() => setImageFailed(true)}
+      />
+    </div>
+  );
+}
+
+function ProductTags({ product }) {
+  const tags = [
+    product.tag,
+    product.category,
+    product.subcategory,
+  ].filter((tag, index, all) =>
+    typeof tag === "string" &&
+    tag.trim() &&
+    all.findIndex(
+      (item) => item?.trim().toLowerCase() === tag.trim().toLowerCase()
+    ) === index
+  );
+
+  if (!tags.length) return null;
+
+  return (
+    <div className="product-tags" aria-label="Product tags">
+      {tags.map((tag) => (
+        <span className="product-tag" key={tag}>
+          {tag}
+        </span>
+      ))}
+    </div>
+  );
+}
 
 function Products() {
   const [searchParams] = useSearchParams();
@@ -200,21 +261,36 @@ function Products() {
   /*
     PRODUCT GROUPS
   */
+ // Merge local STYLAURA catalogue with backend STYLAURA products.
+// Local catalogue entries provide the default product images and tags.
+const backendStylauraProducts = products.filter(
+  (product) => product.isStylaura
+);
 
-  const stylAuraProducts =
-    products.filter(
-      (product) => product.isStylaura
-    );
+const otherProducts = products.filter(
+  (product) => !product.isStylaura
+);
 
-  const otherProducts =
-    products.filter(
-      (product) => !product.isStylaura
-    );
+const stylAuraProducts = [
+  ...stylauraCatalog.map((item) => ({
+    ...item,
+    _id: item.id,
+    isStylaura: true,
+    brand: "STYLAURA",
+  })),
 
-  const visibleOtherProducts =
-    passedChallenge
-      ? otherProducts
-      : [];
+  ...backendStylauraProducts.filter(
+    (product) =>
+      !stylauraCatalog.some(
+        (item) =>
+          item.name.trim().toLowerCase() ===
+          product.name?.trim().toLowerCase()
+      )
+  ),
+];
+
+const visibleOtherProducts = otherProducts;
+
 
   /*
     PERSONALIZATION PROFILE
@@ -251,21 +327,10 @@ function Products() {
 
     return (
       <article
-        key={product._id}
+        key={product._id || product.id || product.name}
         className="product-card recommendation-product-card"
       >
-        <div className="product-image">
-          {product.image ? (
-            <img
-              src={product.image}
-              alt={product.name}
-            />
-          ) : (
-            <span>
-              {product.brand}
-            </span>
-          )}
-        </div>
+        <ProductImage product={product} />
 
         <div className="product-card-content">
           <p className="product-brand">
@@ -282,6 +347,8 @@ function Products() {
               ? ` • ${product.subcategory}`
               : ""}
           </p>
+
+                      <ProductTags product={product} />
 
           {product.description && (
             <p className="product-description">
@@ -919,18 +986,7 @@ function Products() {
                     key={product._id}
                     className="product-card"
                   >
-                    <div className="product-image">
-                      {product.image ? (
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                        />
-                      ) : (
-                        <span>
-                          STYLAURA
-                        </span>
-                      )}
-                    </div>
+                    <ProductImage product={product} isStylaura />
 
                     <div className="product-card-content">
                       <p className="product-brand">
@@ -947,6 +1003,8 @@ function Products() {
                           ? ` • ${product.subcategory}`
                           : ""}
                       </p>
+
+                      <ProductTags product={product} />
 
                       {product.description && (
                         <p className="product-description">
@@ -1061,18 +1119,7 @@ function Products() {
                     key={product._id}
                     className="product-card"
                   >
-                    <div className="product-image">
-                      {product.image ? (
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                        />
-                      ) : (
-                        <span>
-                          {product.brand}
-                        </span>
-                      )}
-                    </div>
+                    <ProductImage product={product} isStylaura={false} />
 
                     <div className="product-card-content">
                       <p className="product-brand">
@@ -1089,6 +1136,8 @@ function Products() {
                           ? ` • ${product.subcategory}`
                           : ""}
                       </p>
+
+                      <ProductTags product={product} />
 
                       {product.description && (
                         <p className="product-description">

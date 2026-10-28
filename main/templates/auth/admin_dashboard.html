@@ -1,0 +1,146 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard | STYLAURA</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+<div class="navbar">
+
+    <!-- LEFT -->
+    <div class="nav-left">
+        <a href="javascript:history.back()" class="nav-back">←</a>
+        <span class="logo">STYLAURA</span>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="nav-right">
+        {% if user.is_authenticated %}
+            <span class="nav-user">👤 {{ user.username }}</span>
+            
+            <a href="/logout/" class="nav-btn logout">Logout</a>
+        {% else %}
+            <a href="/login2/" class="nav-btn">Login</a>
+        {% endif %}
+    </div>
+
+</div>
+
+<div class="page-wrapper">
+    <div class="sparkles"></div>
+
+    <div class="dashboard-card">
+
+        <!-- HEADER -->
+        <div class="dashboard-header">
+            <h1>Admin Dashboard</h1>
+            <p>Welcome Admin 👑</p>
+
+            
+        </div>
+
+        <!-- 📊 STATS -->
+        <div class="stats-grid">
+
+            <div class="stat-card">
+                <h3>Total Users</h3>
+                <p>{{ total_users }}</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Skin Profiles</h3>
+                <p>{{ total_skin }}</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Hair Profiles</h3>
+                <p>{{ total_hair }}</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Colour Analysis</h3>
+                <p>{{ total_colour }}</p>
+            </div>
+
+        </div>
+
+        <!-- ⚙️ MANAGEMENT -->
+        <h2 class="section-title">Management Panel</h2>
+
+        <div class="management-grid">
+
+            <div class="manage-card">
+                <h3>Users</h3>
+                <p>Manage registered users</p>
+                <a href="{% url 'manage_users' %}" class="action-btn">Open</a>
+            </div>
+
+            <div class="manage-card">
+                <h3>Skin</h3>
+                <p>Manage skin analysis</p>
+                <a href="{% url 'manage_skin' %}" class="action-btn">Open</a>
+            </div>
+
+            <div class="manage-card">
+                <h3>Hair</h3>
+                <p>Manage hair analysis</p>
+                <a href="{% url 'manage_hair' %}" class="action-btn">Open</a>
+            </div>
+
+            <div class="manage-card">
+                <h3>Colour</h3>
+                <p>Manage colour analysis</p>
+                <a href="{% url 'manage_colour' %}" class="action-btn">Open</a>
+            </div>
+
+            <div class="manage-card">
+                <h3>Manage Products</h3>
+                <p>Manage all products</p>
+                <a href="{% url 'manage_products' %}" class="action-btn">Open</a>
+            </div>
+
+            <div class="manage-card">
+                <h3>View Orders</h3>
+                <p>Manage all orders</p>
+                <a href="{% url 'manage_orders' %}" class="primary-btn">Open</a>
+            </div>
+
+        </div>
+
+        <!-- 👤 RECENT USERS -->
+        <h2 class="section-title">Recent Orders</h2>
+
+<div class="table-box">
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Mobile</th>
+            <th>Address</th>
+            <th>Amount</th>
+            <th>Status</th>
+        </tr>
+
+        {% for o in recent_orders %}
+        <tr>
+            <td>{{ o.name }}</td>
+            <td>{{ o.mobile }}</td>
+            <td>{{ o.address }}</td>
+            <td>₹{{ o.total_amount }}</td>
+            <td>{{ o.status }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">No orders found</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

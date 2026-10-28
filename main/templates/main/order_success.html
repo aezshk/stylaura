@@ -1,0 +1,25 @@
+{% load static %}
+<div class="global-back">
+    <a href="javascript:history.length > 1 ? history.back() : '/'" class="back-btn">
+        ← Back
+    </a>
+</div>
+<div class="page-wrapper">
+<div class="sparkles"></div>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+<div class="success-card">
+
+    <h1>🎉 Order Placed Successfully!</h1>
+    <p>Your order has been placed.</p>
+
+    <a href="{% url 'order_history' %}" class="primary-btn">
+        View Orders
+    </a>
+
+    <a href="{% url 'products' %}" class="secondary-btn">
+        Continue Shopping
+    </a>
+
+</div>
+
+</div>

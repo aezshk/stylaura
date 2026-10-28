@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verify OTP</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<div class="global-back">
+    <a href="javascript:history.length > 1 ? history.back() : '/'" class="back-btn">
+        ← Back
+    </a>
+</div>
+<body>
+
+<div class="page-wrapper">
+ <div class="sparkles"></div>
+<div class="top-nav">
+    <a href="/login2/" class="nav-btn">Login</a>
+</div>
+
+
+    <div class="login-card">
+
+        <h1>Verify OTP</h1>
+        <p class="subtext">Enter the 6-digit code sent to your number</p>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- OTP BOXES -->
+            <div class="otp-inputs">
+                <input type="text" maxlength="1" class="otp-box" required>
+                <input type="text" maxlength="1" class="otp-box" required>
+                <input type="text" maxlength="1" class="otp-box" required>
+                <input type="text" maxlength="1" class="otp-box" required>
+                <input type="text" maxlength="1" class="otp-box" required>
+                <input type="text" maxlength="1" class="otp-box" required>
+            </div>
+
+            <!-- Hidden field to send combined OTP -->
+            <input type="hidden" name="otp" id="full_otp">
+
+            <button type="submit" class="primary-btn">
+                Verify OTP
+            </button>
+
+            {% if error %}
+                <p style="color:red; margin-top:15px;">{{ error }}</p>
+            {% endif %}
+
+            <p class="resend">
+                Didn’t receive OTP? <a href="{% url 'login' %}">Resend</a>
+            </p>
+
+        </form>
+
+    </div>
+</div>
+
+<script>
+const boxes = document.querySelectorAll(".otp-box");
+const hiddenInput = document.getElementById("full_otp");
+
+boxes.forEach((box, index) => {
+
+    box.addEventListener("input", () => {
+
+        if (box.value.length === 1 && index < boxes.length - 1) {
+            boxes[index + 1].focus();
+        }
+
+        updateOTP();
+    });
+
+    box.addEventListener("keydown", (e) => {
+        if (e.key === "Backspace" && box.value === "" && index > 0) {
+            boxes[index - 1].focus();
+        }
+    });
+});
+
+function updateOTP() {
+    let otp = "";
+    boxes.forEach(box => otp += box.value);
+    hiddenInput.value = otp;
+}
+</script>
+</body>
+</html>

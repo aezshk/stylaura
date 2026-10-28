@@ -1,0 +1,115 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit User</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+<div class="global-back">
+    <a href="javascript:history.back()" class="back-btn">
+        ← Back
+    </a>
+</div>
+
+<div class="page-wrapper">
+
+    <div class="sparkles"></div>
+
+    <div class="dashboard-card"
+         style="max-width:900px; margin:auto;">
+
+        <h1 style="margin-bottom:25px;">
+            Edit User
+        </h1>
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <!-- USERNAME -->
+            <input type="text"
+                   name="username"
+                   value="{{ edit_user.username }}"
+                   placeholder="Username"
+                   required
+                   style="
+                   width:100%;
+                   padding:16px;
+                   margin-bottom:18px;
+                   border:none;
+                   border-radius:18px;
+                   background:#f5f1f1;
+                   ">
+
+            <!-- EMAIL -->
+            <input type="email"
+                   name="email"
+                   value="{{ edit_user.email }}"
+                   placeholder="Email"
+                   required
+                   style="
+                   width:100%;
+                   padding:16px;
+                   margin-bottom:18px;
+                   border:none;
+                   border-radius:18px;
+                   background:#f5f1f1;
+                   ">
+
+            <!-- FIRST NAME -->
+            <input type="text"
+                   name="first_name"
+                   value="{{ edit_user.first_name }}"
+                   placeholder="First Name"
+                   style="
+                   width:100%;
+                   padding:16px;
+                   margin-bottom:18px;
+                   border:none;
+                   border-radius:18px;
+                   background:#f5f1f1;
+                   ">
+
+            <!-- LAST NAME -->
+            <input type="text"
+                   name="last_name"
+                   value="{{ edit_user.last_name }}"
+                   placeholder="Last Name"
+                   style="
+                   width:100%;
+                   padding:16px;
+                   margin-bottom:25px;
+                   border:none;
+                   border-radius:18px;
+                   background:#f5f1f1;
+                   ">
+
+            <!-- BUTTON -->
+            <button type="submit"
+                    style="
+                    width:100%;
+                    padding:16px;
+                    border:none;
+                    border-radius:18px;
+                    background:#d46a82;
+                    color:white;
+                    font-size:18px;
+                    font-weight:600;
+                    cursor:pointer;
+                    ">
+
+                Update
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>

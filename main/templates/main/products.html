@@ -1,0 +1,233 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skincare Routine | STYLAURA</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+<!-- ✅ NAVBAR -->
+<div class="navbar">
+
+    <!-- LEFT -->
+    <div class="nav-left">
+        <a href="javascript:history.back()" class="nav-back">←</a>
+        <span class="logo">STYLAURA</span>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="nav-right">
+
+        {% if user.is_authenticated %}
+
+            <span class="nav-user">
+                👤 {{ user.username }}
+            </span>
+
+            <a href="{% url 'cart' %}" class="nav-btn">
+                🛒 Cart
+            </a>
+
+            <a href="{% url 'logout' %}" class="nav-btn logout">
+                Logout
+            </a>
+
+        {% else %}
+
+            <a href="{% url 'login2' %}" class="nav-btn">
+                Login
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<!-- ✅ MAIN -->
+<div class="main">
+
+    <!-- HEADER -->
+    <div class="top-bar">
+
+        <h1>
+            ✨ Your Personalized Skincare Routine
+        </h1>
+
+        <a href="{% url 'cart' %}" class="view-cart">
+            🛒 View Cart
+        </a>
+
+    </div>
+
+
+    <!-- ✅ TOP PRODUCT -->
+    {% if top_product %}
+
+    <div class="top-product">
+
+        <img src="{{ top_product.image|default:'/static/images/bg.jpg' }}"
+             alt="{{ top_product.name }}">
+
+        <div class="top-info">
+
+            <h3>
+                ✨ Top Pick For You
+            </h3>
+
+            <p class="name">
+                {{ top_product.name }}
+            </p>
+
+            <p>
+                ₹{{ top_product.price }}
+                |
+                ⭐ {{ top_product.rating }}
+            </p>
+
+            <a href="{% url 'add_to_cart' top_product.id %}"
+               class="cart-btn">
+                Add to Cart
+            </a>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+
+    <!-- ✅ ROUTINES -->
+    {% for tier, data in routines.items %}
+
+    <div class="tier">
+
+        <h2>
+            {{ tier|title }} Routine
+        </h2>
+
+
+        <!-- 🌞 MORNING -->
+        <div class="section">
+
+            <h3>
+                🌞 Morning Routine
+            </h3>
+
+            <div class="steps">
+
+                {% for step in data.am %}
+                    <span>{{ step }}</span>
+                {% endfor %}
+
+            </div>
+
+
+            <div class="grid">
+
+                {% for item in data.am_products %}
+
+                <div class="card">
+
+                    <img src="{{ item.image|default:'https://picsum.photos/400' }}"
+                         alt="{{ item.name }}">
+
+                    <div class="card-body">
+
+                        <p class="product-name">
+                            {{ item.name }}
+                        </p>
+
+                        <p class="product-price">
+                            ₹{{ item.price }}
+                        </p>
+
+                        <p class="product-rating">
+                            ⭐ {{ item.rating }}
+                        </p>
+
+                        <a href="{% url 'add_to_cart' item.id %}"
+                           class="cart-btn">
+                            Add to Cart
+                        </a>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+
+        <!-- 🌙 NIGHT -->
+        <div class="section">
+
+            <h3>
+                🌙 Night Routine
+            </h3>
+
+            <div class="steps">
+
+                {% for step in data.pm %}
+                    <span>{{ step }}</span>
+                {% endfor %}
+
+            </div>
+
+
+            <div class="grid">
+
+                {% for item in data.pm_products %}
+
+                <div class="card">
+
+                    <img src="{{ item.image|default:'/static/images/bg.jpg' }}"
+                         alt="{{ item.name }}">
+
+                    <div class="card-body">
+
+                        <p class="product-name">
+                            {{ item.name }}
+                        </p>
+
+                        <p class="product-price">
+                            ₹{{ item.price }}
+                        </p>
+
+                        <p class="product-rating">
+                            ⭐ {{ item.rating }}
+                        </p>
+
+                        <a href="{% url 'add_to_cart' item.id %}"
+                           class="cart-btn">
+                            Add to Cart
+                        </a>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+</div>
+
+</body>
+</html>

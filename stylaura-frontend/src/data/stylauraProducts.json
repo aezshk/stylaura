@@ -1,0 +1,542 @@
+[
+  {
+    "id": "gentle-cleanser",
+    "name": "Gentle Cleanser",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Skincare",
+    "subcategory": "Cleanser",
+    "tag": "Cleanse",
+    "tags": [
+      "Cleanse",
+      "Gentle"
+    ],
+    "price": 799,
+    "image": "/images/stylaura/gentle-cleanser.png",
+    "packagingBodyColor": "#DDF3FA",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "hydrating-toner",
+    "name": "Hydrating Toner",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Skincare",
+    "subcategory": "Toner",
+    "tag": "Refresh",
+    "tags": [
+      "Refresh",
+      "Balance"
+    ],
+    "price": 699,
+    "image": "/images/stylaura/hydrating-toner.png",
+    "packagingBodyColor": "#F3D7CB",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "vitamin-c-serum",
+    "name": "Vitamin C Serum",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Skincare",
+    "subcategory": "Serum",
+    "tag": "Brighten",
+    "tags": [
+      "Brighten",
+      "Glow"
+    ],
+    "price": 899,
+    "image": "/images/stylaura/vitamin-c-serum.png",
+    "packagingBodyColor": "#F6C99E",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "hyaluronic-acid-serum",
+    "name": "Hyaluronic Acid Serum",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Skincare",
+    "subcategory": "Serum",
+    "tag": "Hydrate",
+    "tags": [
+      "Hydrate",
+      "Plump"
+    ],
+    "price": 899,
+    "image": "/images/stylaura/hyaluronic-acid-serum.png",
+    "packagingBodyColor": "#DCCDF0",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "niacinamide-serum",
+    "name": "Niacinamide Serum",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Skincare",
+    "subcategory": "Serum",
+    "tag": "Clear",
+    "tags": [
+      "Clear",
+      "Even Tone"
+    ],
+    "price": 899,
+    "image": "/images/stylaura/niacinamide-serum.png",
+    "packagingBodyColor": "#DCE9D6",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "retinol-serum",
+    "name": "Retinol Serum",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Skincare",
+    "subcategory": "Serum",
+    "tag": "Clear",
+    "tags": [
+      "Clear",
+      "Smooth"
+    ],
+    "price": 999,
+    "image": "/images/stylaura/retinol-serum.png",
+    "packagingBodyColor": "#F4D8A9",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "nourishing-moisturizer",
+    "name": "Nourishing Moisturizer",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Skincare",
+    "subcategory": "Moisturizer",
+    "tag": "Hydrate",
+    "tags": [
+      "Hydrate",
+      "Repair"
+    ],
+    "price": 849,
+    "image": "/images/stylaura/nourishing-moisturizer.png",
+    "packagingBodyColor": "#DDF3FA",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "sunscreen-spf-50",
+    "name": "Sunscreen SPF 50",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Skincare",
+    "subcategory": "Sunscreen",
+    "tag": "Protect",
+    "tags": [
+      "Protect",
+      "UV Care"
+    ],
+    "price": 799,
+    "image": "/images/stylaura/sunscreen-spf-50.png",
+    "packagingBodyColor": "#FFF0D8",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "under-eye-cream",
+    "name": "Under Eye Cream",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Skincare",
+    "subcategory": "Eye Care",
+    "tag": "Brighten",
+    "tags": [
+      "Brighten",
+      "Depuff"
+    ],
+    "price": 699,
+    "image": "/images/stylaura/under-eye-cream.png",
+    "packagingBodyColor": "#F4D4D8",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "clay-face-mask",
+    "name": "Clay Face Mask",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Skincare",
+    "subcategory": "Mask",
+    "tag": "Detox",
+    "tags": [
+      "Detox",
+      "Purify"
+    ],
+    "price": 799,
+    "image": "/images/stylaura/clay-face-mask.png",
+    "packagingBodyColor": "#DCE9D6",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "glow-foundation",
+    "name": "Glow Foundation",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Makeup",
+    "subcategory": "Foundation",
+    "tag": "Natural",
+    "tags": [
+      "Natural",
+      "Long Wear"
+    ],
+    "price": 999,
+    "image": "/images/stylaura/glow-foundation.png",
+    "packagingBodyColor": "#F4D8C0",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "radiant-concealer",
+    "name": "Radiant Concealer",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Makeup",
+    "subcategory": "Concealer",
+    "tag": "Cover",
+    "tags": [
+      "Cover",
+      "Brighten"
+    ],
+    "price": 799,
+    "image": "/images/stylaura/radiant-concealer.png",
+    "packagingBodyColor": "#EEDBC8",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "smooth-primer",
+    "name": "Smooth Primer",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Makeup",
+    "subcategory": "Primer",
+    "tag": "Blur",
+    "tags": [
+      "Blur",
+      "Prep"
+    ],
+    "price": 899,
+    "image": "/images/stylaura/smooth-primer.png",
+    "packagingBodyColor": "#DDF3FA",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "soft-blush",
+    "name": "Soft Blush",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Makeup",
+    "subcategory": "Blush",
+    "tag": "Natural",
+    "tags": [
+      "Natural",
+      "Buildable"
+    ],
+    "price": 799,
+    "image": "/images/stylaura/soft-blush.png",
+    "packagingBodyColor": "#F2C5C5",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "radiant-highlighter",
+    "name": "Radiant Highlighter",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Makeup",
+    "subcategory": "Highlighter",
+    "tag": "Glow",
+    "tags": [
+      "Glow",
+      "Illuminate"
+    ],
+    "price": 799,
+    "image": "/images/stylaura/radiant-highlighter.png",
+    "packagingBodyColor": "#F3E0B8",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "matte-lipstick",
+    "name": "Matte Lipstick",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Makeup",
+    "subcategory": "Lipstick",
+    "tag": "Rich Color",
+    "tags": [
+      "Rich Color",
+      "Long Wear"
+    ],
+    "price": 699,
+    "image": "/images/stylaura/matte-lipstick.png",
+    "packagingBodyColor": "#D98A83",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "lip-gloss",
+    "name": "Lip Gloss",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Makeup",
+    "subcategory": "Lip Gloss",
+    "tag": "Shine",
+    "tags": [
+      "Shine",
+      "Hydrate"
+    ],
+    "price": 599,
+    "image": "/images/stylaura/lip-gloss.png",
+    "packagingBodyColor": "#F3C5C8",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "mascara",
+    "name": "Mascara",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Makeup",
+    "subcategory": "Mascara",
+    "tag": "Lift",
+    "tags": [
+      "Lift",
+      "Volume"
+    ],
+    "price": 699,
+    "image": "/images/stylaura/mascara.png",
+    "packagingBodyColor": "#EEDBC8",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "setting-powder",
+    "name": "Setting Powder",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Makeup",
+    "subcategory": "Powder",
+    "tag": "Oil Control",
+    "tags": [
+      "Oil Control",
+      "Smooth"
+    ],
+    "price": 699,
+    "image": "/images/stylaura/setting-powder.png",
+    "packagingBodyColor": "#F1D8B8",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "setting-spray",
+    "name": "Setting Spray",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Makeup",
+    "subcategory": "Setting Spray",
+    "tag": "Long Wear",
+    "tags": [
+      "Long Wear",
+      "Fresh"
+    ],
+    "price": 699,
+    "image": "/images/stylaura/setting-spray.png",
+    "packagingBodyColor": "#DDF3FA",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "balancing-shampoo",
+    "name": "Balancing Shampoo",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Haircare",
+    "subcategory": "Shampoo",
+    "tag": "Cleanse",
+    "tags": [
+      "Cleanse",
+      "Volume"
+    ],
+    "price": 699,
+    "image": "/images/stylaura/balancing-shampoo.png",
+    "packagingBodyColor": "#DCE9D6",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "repairing-conditioner",
+    "name": "Repairing Conditioner",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Haircare",
+    "subcategory": "Conditioner",
+    "tag": "Nourish",
+    "tags": [
+      "Nourish",
+      "Smooth"
+    ],
+    "price": 699,
+    "image": "/images/stylaura/repairing-conditioner.png",
+    "packagingBodyColor": "#F4D8A9",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "hair-growth-oil",
+    "name": "Hair Growth Oil",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Haircare",
+    "subcategory": "Hair Oil",
+    "tag": "Strengthen",
+    "tags": [
+      "Strengthen",
+      "Growth"
+    ],
+    "price": 749,
+    "image": "/images/stylaura/hair-growth-oil.png",
+    "packagingBodyColor": "#DCCDF0",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "nourishing-hair-mask",
+    "name": "Nourishing Hair Mask",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Haircare",
+    "subcategory": "Hair Mask",
+    "tag": "Deep Care",
+    "tags": [
+      "Deep Care",
+      "Repair"
+    ],
+    "price": 799,
+    "image": "/images/stylaura/nourishing-hair-mask.png",
+    "packagingBodyColor": "#DCE9D6",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "leave-in-serum",
+    "name": "Leave-In Serum",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Haircare",
+    "subcategory": "Treatment",
+    "tag": "Frizz Control",
+    "tags": [
+      "Frizz Control",
+      "Shine"
+    ],
+    "price": 699,
+    "image": "/images/stylaura/leave-in-serum.png",
+    "packagingBodyColor": "#F3D7CB",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "scalp-toner",
+    "name": "Scalp Toner",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Haircare",
+    "subcategory": "Scalp Care",
+    "tag": "Balance",
+    "tags": [
+      "Balance",
+      "Refresh"
+    ],
+    "price": 699,
+    "image": "/images/stylaura/scalp-toner.png",
+    "packagingBodyColor": "#DCE9D6",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "body-lotion",
+    "name": "Body Lotion",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Body Care",
+    "subcategory": "Lotion",
+    "tag": "Hydrate",
+    "tags": [
+      "Hydrate",
+      "Soften"
+    ],
+    "price": 699,
+    "image": "/images/stylaura/body-lotion.png",
+    "packagingBodyColor": "#F3D7CB",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "body-scrub",
+    "name": "Body Scrub",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Body Care",
+    "subcategory": "Scrub",
+    "tag": "Exfoliate",
+    "tags": [
+      "Exfoliate",
+      "Smooth"
+    ],
+    "price": 699,
+    "image": "/images/stylaura/body-scrub.png",
+    "packagingBodyColor": "#E9D6C5",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "lip-balm",
+    "name": "Lip Balm",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Lip Care",
+    "subcategory": "Balm",
+    "tag": "Hydrate",
+    "tags": [
+      "Hydrate",
+      "Soften"
+    ],
+    "price": 399,
+    "image": "/images/stylaura/lip-balm.png",
+    "packagingBodyColor": "#F6D6B7",
+    "capColor": "#111111",
+    "currency": "INR"
+  },
+  {
+    "id": "lip-mask",
+    "name": "Lip Mask",
+    "brand": "STYLAURA",
+    "isStylaura": true,
+    "category": "Lip Care",
+    "subcategory": "Mask",
+    "tag": "Repair",
+    "tags": [
+      "Repair",
+      "Plump"
+    ],
+    "price": 499,
+    "image": "/images/stylaura/lip-mask.png",
+    "packagingBodyColor": "#F4D4D8",
+    "capColor": "#111111",
+    "currency": "INR"
+  }
+]

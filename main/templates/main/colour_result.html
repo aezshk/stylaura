@@ -1,0 +1,100 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Colour Analysis Result</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+<div class="page-wrapper">
+
+    <div class="sparkles"></div>
+
+    <div class="dashboard-card">
+
+        <h1>AI Colour Analysis Result</h1>
+
+        <br>
+
+        <h2>
+            Detected Undertone:
+            {{ undertone }}
+        </h2>
+
+        <br>
+
+        <p>
+            Based on AI skin tone analysis,
+            your undertone appears
+            <strong>{{ undertone }}</strong>.
+        </p>
+
+        <br>
+
+        <h3>Recommended Colour Palette</h3>
+
+        <div class="palette-grid">
+
+            {% for color in palette %}
+
+            <div class="color-card">
+
+                {{ color }}
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        <br><br>
+
+        {% if user.is_authenticated %}
+
+            <a href="{% url 'colour_products' %}" class="primary-btn">
+                View Recommendations
+            </a>
+
+        {% else %}
+
+            <a href="/login2/?next=/colour-products/" class="primary-btn">
+                Login to View Recommendations
+            </a>
+
+        {% endif %}
+
+        <br><br>
+
+        <a href="{% url 'colour' %}" class="primary-btn">
+            Analyze Again
+        </a>
+
+    </div>
+
+</div>
+
+<style>
+
+.palette-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+    gap:15px;
+    margin-top:20px;
+}
+
+.color-card{
+    background:#f6dce2;
+    padding:20px;
+    border-radius:16px;
+    text-align:center;
+    font-weight:600;
+    box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
+
+</style>
+
+</body>
+</html>

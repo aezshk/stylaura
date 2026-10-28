@@ -1,0 +1,113 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tell Us About You | STYLAURA</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<div class="global-back">
+    <a href="javascript:history.length > 1 ? history.back() : '/'" class="back-btn">
+        ← Back
+    </a>
+</div>
+<body>
+<div class="top-nav">
+    <a href="/login2/" class="nav-btn">Login</a>
+</div>
+
+<!-- ================= LOGIN MODAL ================= -->
+<div id="loginModal" class="modal-overlay">
+    <div class="sparkles"></div>
+    <div class="modal-box">
+
+        <span class="close-btn" onclick="closeModal()">×</span>
+
+        <h2>Login to Continue</h2>
+
+        <form method="POST" action="{% url 'login2' %}">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Username" class="full-input" required>
+            <input type="password" name="password" placeholder="Password" class="full-input" required>
+            <button type="submit" class="primary-btn">Login</button>
+        </form>
+
+        <p style="margin-top:15px; font-size:14px;">
+            Want to explore first?
+            <span onclick="closeModal()" style="color:#b76e79; cursor:pointer;">
+                Continue as Guest
+            </span>
+        </p>
+
+    </div>
+</div>
+<!-- ================= END MODAL ================= -->
+
+
+<!-- ================= PROFILE CARD ================= -->
+<div class="page-wrapper">
+    <div class="login-card">
+
+        <h1>Tell us about you</h1>
+        <p class="subtitle">This helps us personalize your experience</p>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- NAME -->
+            <input type="text" name="name" placeholder="Your name"
+                   class="full-input" required>
+
+            <!-- GENDER -->
+            <div class="gender-row">
+                <label>
+                    <input type="radio" name="gender" value="female" required>
+                    Female
+                </label>
+                <label>
+                    <input type="radio" name="gender" value="male">
+                    Male
+                </label>
+                <label>
+                    <input type="radio" name="gender" value="other">
+                    Other
+                </label>
+            </div>
+
+            <!-- AGE -->
+            <input type="number" name="age" placeholder="Your age"
+                   class="full-input" required>
+
+            <button type="submit" class="primary-btn">
+                Continue
+            </button>
+
+        </form>
+
+    </div>
+</div>
+<!-- ================= END PROFILE ================= -->
+
+
+<!-- ================= JAVASCRIPT ================= -->
+<script>
+function openModal() {
+    document.getElementById("loginModal").style.display = "flex";
+}
+
+function closeModal() {
+    document.getElementById("loginModal").style.display = "none";
+}
+</script>
+
+{% if show_login %}
+<script>
+window.onload = function() {
+    openModal();
+};
+</script>
+{% endif %}
+<!-- ================= END JS ================= -->
+
+</body>
+</html>

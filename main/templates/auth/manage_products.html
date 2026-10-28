@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Products</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<div class="global-back">
+    <a href="javascript:history.length > 1 ? history.back() : '/'" class="back-btn">
+        ← Back
+    </a>
+</div>
+<body>
+<div class="page-wrapper">
+    <div class="sparkles"></div>
+    <div class="dashboard-card">
+
+        <h1 >Manage Product </h1>
+    <a href="{% url 'add_product' %}" class="action-btn">
+        Add Product
+    </a>
+
+    <div class="products-grid" style="margin-top:30px;">
+
+        {% for product in products %}
+        <div class="product-card">
+
+         <img src="{{ p.item.image }}">
+
+            <h3>{{ product.name }}</h3>
+            <p>{{ product.category }} | {{ product.tier }}</p>
+            <p>₹{{ product.price }}</p>
+
+            <a href="{% url 'delete_product' product.id %}" class="delete-btn">
+                Delete
+            </a>
+            
+            <a href="{% url 'edit_product' product.id %}" class="action-btn">
+     Edit
+</a>
+
+        </div>
+        {% empty %}
+            <p>No products added yet</p>
+        {% endfor %}
+
+    </div>
+
+</div>
+
+</body>
+</html>
