@@ -1,89 +1,109 @@
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import API_BASE_URL from "../../api";
+import { useAuth } from "../../context/AuthContext";
 
-const ANALYSIS_ENDPOINT = `${API_BASE_URL}/api/analysis/skin`;
 const SAVE_ENDPOINT = `${API_BASE_URL}/api/auth/skin-profile`;
+
+const SKIN_GUIDES = {
+  Dry: {
+    summary:
+      "Your general care guide focuses on supporting skin comfort and reducing feelings of dryness.",
+    hydration: "Focus on gentle moisturising",
+    texture: "Use gentle products",
+    sensitivity: "Introduce products gradually",
+    recommendations: [
+      "Use a gentle cleanser that does not leave your skin feeling tight.",
+      "Apply a moisturiser suited to your skin.",
+      "Avoid very hot water and harsh exfoliation.",
+      "Introduce new products one at a time.",
+    ],
+  },
+  Oily: {
+    summary:
+      "Your general care guide focuses on gentle cleansing and lightweight moisturising.",
+    hydration: "Use a lightweight moisturiser",
+    texture: "Keep the routine gentle",
+    sensitivity: "Avoid over-cleansing",
+    recommendations: [
+      "Use a gentle cleanser rather than repeatedly washing your face.",
+      "Consider a lightweight, non-comedogenic moisturiser.",
+      "Use broad-spectrum sunscreen during the day.",
+      "Avoid harsh scrubs that may irritate your skin.",
+    ],
+  },
+  Combination: {
+    summary:
+      "Your general care guide focuses on balancing comfort across different areas of the face.",
+    hydration: "Adjust moisturiser to your needs",
+    texture: "Keep care balanced",
+    sensitivity: "Choose gentle products",
+    recommendations: [
+      "Use a gentle cleanser across your face.",
+      "Apply moisturiser according to the needs of different areas.",
+      "Use broad-spectrum sunscreen during the day.",
+      "Avoid adding several new products at once.",
+    ],
+  },
+  Normal: {
+    summary:
+      "Your general care guide focuses on maintaining a comfortable, consistent skin-care routine.",
+    hydration: "Maintain comfortable hydration",
+    texture: "Keep a simple routine",
+    sensitivity: "Monitor product reactions",
+    recommendations: [
+      "Cleanse gently without over-washing.",
+      "Use a moisturiser that feels comfortable on your skin.",
+      "Use broad-spectrum sunscreen during the day.",
+      "Introduce new products gradually.",
+    ],
+  },
+  Sensitive: {
+    summary:
+      "Your general care guide focuses on a simple routine and reducing potential irritation.",
+    hydration: "Use a gentle moisturiser",
+    texture: "Avoid harsh exfoliation",
+    sensitivity: "Prioritise gentle products",
+    recommendations: [
+      "Choose fragrance-free products when possible.",
+      "Patch-test new products according to their instructions.",
+      "Avoid introducing multiple active ingredients at once.",
+      "Stop using products that cause irritation and seek professional advice if symptoms persist.",
+    ],
+  },
+};
 
 function SkinResult() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { checkAuth } = useAuth();
 
   const image = location.state?.image;
+  const selectedSkinType = location.state?.skinType;
+  const selectedConcern = location.state?.concern;
 
-  const [status, setStatus] = useState("analyzing");
   const [analysis, setAnalysis] = useState(null);
   const [error, setError] = useState("");
   const [saveStatus, setSaveStatus] = useState("idle");
 
-  // Prevent duplicate analysis requests during React effect re-runs.
-  const startedRef = useRef(false);
-
   useEffect(() => {
-    if (startedRef.current) return;
+    // No paid AI or photo-analysis request is made here.
+    const type = selectedSkinType || "Normal";
+    const guide = SKIN_GUIDES[type] || SKIN_GUIDES.Normal;
 
-    if (!image || typeof image !== "string" ||
-        !image.startsWith("data:image/")) {
-      setStatus("error");
-      setError("No valid photo was provided. Please upload a photo first.");
-      return;
-    }
-
-    startedRef.current = true;
-    const controller = new AbortController();
-
-    async function analyzeSkin() {
-      setStatus("analyzing");
-      setError("");
-
-      try {
-        const response = await fetch(ANALYSIS_ENDPOINT, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          cache: "no-store",
-          signal: controller.signal,
-          body: JSON.stringify({ image }),
-        });
-
-        const data = await response.json().catch(() => null);
-
-        if (!response.ok) {
-          throw new Error(
-            data?.message ||
-            (response.status === 401
-              ? "Please sign in to analyze your skin."
-              : "Unable to analyze this photo.")
-          );
-        }
-
-        if (
-          !data?.success ||
-          !data?.analysis ||
-          typeof data.analysis.skinType !== "string"
-        ) {
-          throw new Error(
-            data?.message ||
-            "The analysis service returned an invalid result."
-          );
-        }
-
-        setAnalysis(data.analysis);
-        setStatus("complete");
-      } catch (err) {
-        if (err.name === "AbortError") return;
-
-        console.error("Skin analysis error:", err);
-        setError(err.message || "Skin analysis failed. Please try again.");
-        setStatus("error");
-      }
-    }
-
-    analyzeSkin();
-
-    return () => controller.abort();
-  }, [image]);
+    setAnalysis({
+      mode: "rule_based",
+      photoAnalyzed: false,
+      skinType: type,
+      concern: selectedConcern || "",
+      hydration: guide.hydration,
+      texture: guide.texture,
+      sensitivity: guide.sensitivity,
+      summary: guide.summary,
+      recommendations: guide.recommendations,
+    });
+  }, [selectedSkinType, selectedConcern]);
 
   const saveProfile = async () => {
     if (!analysis || saveStatus === "saving" || saveStatus === "saved") {
@@ -96,69 +116,48 @@ function SkinResult() {
     try {
       const response = await fetch(SAVE_ENDPOINT, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         credentials: "include",
-        cache: "no-store",
         body: JSON.stringify({
-          image,
+          image: image || null,
+          skinProfile: analysis,
           ...analysis,
         }),
       });
 
-      const data = await response.json().catch(() => null);
+      const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(data?.message || "Unable to save your profile.");
+        throw new Error(
+          data.message || "Unable to save your skin profile. Please sign in again."
+        );
       }
 
       setSaveStatus("saved");
+
+      if (typeof checkAuth === "function") {
+        await checkAuth();
+      }
     } catch (err) {
       console.error("Skin profile save error:", err);
-      setSaveStatus("error");
       setError(err.message || "Unable to save your profile.");
+      setSaveStatus("error");
     }
   };
 
-  if (status === "analyzing") {
+  if (!analysis) {
     return (
       <main className="result-page skin-result-page">
         <section className="result-intro" aria-live="polite">
-          <p className="eyebrow">STYLAURA · SKIN ANALYSIS</p>
+          <p className="eyebrow">STYLAURA · SKIN CARE</p>
           <h1>
-            Understanding your
+            Preparing your
             <br />
-            <em>skin profile.</em>
+            <em>care guide.</em>
           </h1>
-          <p>
-            Checking your photo and preparing your analysis.
-            Please keep this page open.
-          </p>
-          <div className="analysis-loading" role="status">
-            Analyzing your photo…
-          </div>
-        </section>
-      </main>
-    );
-  }
-
-  if (status === "error") {
-    return (
-      <main className="result-page skin-result-page">
-        <section className="result-intro">
-          <p className="eyebrow">STYLAURA · SKIN ANALYSIS</p>
-          <h1>
-            Let's get a
-            <br />
-            <em>clearer picture.</em>
-          </h1>
-          <p className="auth-error" role="alert">{error}</p>
-          <button
-            type="button"
-            className="primary-button"
-            onClick={() => navigate("/skin-analysis")}
-          >
-            Upload Another Photo
-          </button>
+          <p role="status">Preparing your free guide…</p>
         </section>
       </main>
     );
@@ -173,27 +172,34 @@ function SkinResult() {
   return (
     <main className="result-page skin-result-page">
       <section className="result-intro">
-        <p className="eyebrow">STYLAURA · YOUR SKIN PROFILE</p>
+        <p className="eyebrow">STYLAURA · YOUR SKIN CARE GUIDE</p>
 
         <h1>
-          Your skin,
+          Care for your skin,
           <br />
-          <em>understood.</em>
+          <em>your way.</em>
         </h1>
 
         <p>
-          These are image-based observations, not a medical diagnosis.
-          Lighting, camera quality, and image angle can affect accuracy.
+          This free guide offers general skin-care suggestions. Your
+          uploaded photo has not been analyzed, and this guide cannot
+          diagnose a skin condition.
+        </p>
+
+        <p className="profile-save-status" role="note">
+          Free care guide · No paid AI service required
         </p>
 
         {saveStatus === "saved" && (
           <p className="profile-save-status" role="status">
-            Your profile has been saved.
+            Your skin profile has been saved.
           </p>
         )}
 
-        {saveStatus === "error" && (
-          <p className="auth-error" role="alert">{error}</p>
+        {error && (
+          <p className="auth-error" role="alert">
+            {error}
+          </p>
         )}
       </section>
 
@@ -201,32 +207,47 @@ function SkinResult() {
         <article className="result-main-card">
           <header className="result-card-header">
             <div>
-              <p className="result-label">SKIN PROFILE</p>
+              <p className="result-label">YOUR SELECTED PROFILE</p>
               <h2>{analysis.skinType}</h2>
             </div>
-            <span className="result-score">IMAGE OBSERVATIONS</span>
+            <span className="result-score">FREE CARE GUIDE</span>
           </header>
 
-          <div className="skin-result-image">
-            <img src={image} alt="Photo used for skin analysis" />
-          </div>
+          {image && (
+            <div className="skin-result-image">
+              <img
+                src={image}
+                alt="Photo selected for the skin-care session; not analyzed"
+              />
+              <p>This is your selected photo. It was not analyzed.</p>
+            </div>
+          )}
 
           <div className="result-stats">
             {fields.map(([label, value]) => (
               <div key={label}>
                 <span>{label}</span>
-                <strong>{value || "Not assessed"}</strong>
+                <strong>{value || "General guidance"}</strong>
               </div>
             ))}
           </div>
 
-          {analysis.summary && (
-            <p className="result-summary">{analysis.summary}</p>
+          {analysis.concern && (
+            <section className="hair-observations">
+              <h3>Your selected concern</h3>
+              <p>{analysis.concern}</p>
+            </section>
           )}
+
+          <section className="hair-observations">
+            <h3>About your care guide</h3>
+            <p>{analysis.summary}</p>
+          </section>
         </article>
 
         <aside className="result-side-card">
-          <p className="side-label">PERSONALIZED GUIDANCE</p>
+          <p className="side-label">GENERAL SKIN-CARE GUIDANCE</p>
+
           <h3>
             Your next steps
             <br />
@@ -234,32 +255,34 @@ function SkinResult() {
           </h3>
 
           <p>
-            Use these observations as a starting point. Choose gentle,
-            suitable products and discontinue anything that causes irritation.
+            These suggestions are general cosmetic guidance, not
+            photo-based findings or a medical diagnosis. Stop using
+            products that irritate your skin.
           </p>
 
-          {Array.isArray(analysis.recommendations) &&
-            analysis.recommendations.length > 0 && (
-              <ul className="focus-list">
-                {analysis.recommendations.map((item, index) => (
-                  <li key={`${item}-${index}`}>
-                    <span>{String(index + 1).padStart(2, "0")}</span>
-                    <strong>{item}</strong>
-                  </li>
-                ))}
-              </ul>
-            )}
+          <ul className="focus-list">
+            {analysis.recommendations.map((item, index) => (
+              <li key={`${index}-${item}`}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <strong>{item}</strong>
+              </li>
+            ))}
+          </ul>
         </aside>
       </section>
 
       <section className="result-cta">
         <p className="eyebrow">NEXT STEP</p>
+
         <h2>
           Build your
           <br />
           <em>routine.</em>
         </h2>
-        <p>Explore products matched to your skin profile.</p>
+
+        <p>
+          Explore products that may suit your skin-care preferences.
+        </p>
 
         <div className="result-actions">
           <button
@@ -272,7 +295,9 @@ function SkinResult() {
               ? "Saving Profile…"
               : saveStatus === "saved"
                 ? "Profile Saved"
-                : "Save My Profile"}
+                : saveStatus === "error"
+                  ? "Try Saving Again"
+                  : "Save My Profile"}
           </button>
 
           <Link
