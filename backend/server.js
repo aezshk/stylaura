@@ -30,13 +30,14 @@ connectDB();
 
 // Middleware.
 
+
 const allowedOrigins = [
   "http://localhost:5173",
   "https://stylaura-5axp.vercel.app",
   "https://stylaura-git-master-aezshkstylaura.vercel.app",
-];
   process.env.FRONTEND_URL?.replace(/\/+$/, ""),
 ].filter(Boolean);
+
 
 app.use(
   cors({
