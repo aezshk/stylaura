@@ -1,6 +1,4 @@
 
-const OpenAI = require("openai");
-
 const ALLOWED_HAIR_TYPES = [
   "Straight",
   "Wavy",
@@ -8,324 +6,156 @@ const ALLOWED_HAIR_TYPES = [
   "Coily",
 ];
 
-const ALLOWED_CONCERNS = [
-  "Dryness",
-  "Frizz",
-  "Hair Fall",
-  "Damage",
-  "Dandruff",
-  "Lack of Volume",
-];
+const CARE_GUIDES = {
+  Dryness: {
+    summary:
+      "Your general care plan focuses on helping hair feel softer and reducing dryness.",
+    observations: [
+      "Selected concern: Dryness",
+      "Suggestions are based on your selections, not photo analysis.",
+    ],
+    recommendations: [
+      "Use a gentle shampoo suited to your hair.",
+      "Apply conditioner to the lengths after washing.",
+      "Consider a leave-in conditioner if your hair feels dry.",
+      "Reduce excessive heat styling and use heat protection when needed.",
+    ],
+  },
 
-const MAX_IMAGE_BYTES = 7 * 1024 * 1024;
+  Frizz: {
+    summary:
+      "Your general care plan focuses on smoother-looking hair and frizz management.",
+    observations: [
+      "Selected concern: Frizz",
+      "Suggestions are based on your selections, not photo analysis.",
+    ],
+    recommendations: [
+      "Condition your hair after shampooing.",
+      "Detangle gently with a wide-tooth comb.",
+      "Consider a leave-in conditioner or anti-frizz product.",
+      "Reduce rough towel rubbing and excessive heat styling.",
+    ],
+  },
 
-const IMAGE_SIGNATURES = {
-  "image/jpeg": (buffer) =>
-    buffer.length >= 3 &&
-    buffer[0] === 0xff &&
-    buffer[1] === 0xd8 &&
-    buffer[2] === 0xff,
+  "Hair Fall": {
+    summary:
+      "Your general care plan focuses on gentle handling and reducing avoidable hair breakage.",
+    observations: [
+      "Selected concern: Hair Fall",
+      "A photo or selected concern cannot establish the cause of hair loss.",
+    ],
+    recommendations: [
+      "Avoid tight hairstyles that pull on the roots.",
+      "Detangle gently and avoid pulling wet hair.",
+      "Use a conditioner to help reduce breakage while combing.",
+      "Seek medical advice if hair loss is sudden, persistent, or worsening.",
+    ],
+  },
 
-  "image/png": (buffer) =>
-    buffer.length >= 8 &&
-    buffer.subarray(0, 8).equals(
-      Buffer.from([
-        137, 80, 78, 71, 13, 10, 26, 10,
-      ])
-    ),
+  Damage: {
+    summary:
+      "Your general care plan focuses on reducing further damage and improving manageability.",
+    observations: [
+      "Selected concern: Damage",
+      "Suggestions are based on your selections, not photo analysis.",
+    ],
+    recommendations: [
+      "Use conditioner after washing.",
+      "Limit high-heat styling and use heat protection.",
+      "Handle wet hair gently and avoid aggressive brushing.",
+      "Consider trimming split ends if they persist.",
+    ],
+  },
 
-  "image/webp": (buffer) =>
-    buffer.length >= 12 &&
-    buffer.toString("ascii", 0, 4) === "RIFF" &&
-    buffer.toString("ascii", 8, 12) === "WEBP",
+  Dandruff: {
+    summary:
+      "Your general care plan focuses on scalp-care habits. This tool cannot diagnose dandruff.",
+    observations: [
+      "Selected concern: Dandruff",
+      "Scalp conditions cannot be confirmed by this rule-based assessment.",
+    ],
+    recommendations: [
+      "Wash your scalp regularly with a routine suited to your needs.",
+      "Avoid scratching or irritating the scalp.",
+      "If flakes persist, consider an appropriate anti-dandruff product and follow its label.",
+      "Seek medical advice for persistent irritation, pain, or worsening symptoms.",
+    ],
+  },
+
+  "Lack of Volume": {
+    summary:
+      "Your general care plan focuses on lightweight care and fuller-looking styles.",
+    observations: [
+      "Selected concern: Lack of Volume",
+      "Suggestions are based on your selections, not photo analysis.",
+    ],
+    recommendations: [
+      "Consider a lightweight shampoo and conditioner.",
+      "Apply heavier conditioners mainly to the lengths and ends.",
+      "Try gentle root-lifting styling techniques.",
+      "Avoid applying too much styling product at the roots.",
+    ],
+  },
 };
-
-function sendError(res, status, message) {
-  return res.status(status).json({
-    success: false,
-    message,
-  });
-}
-
-function parseImage(image) {
-  if (typeof image !== "string") {
-    return null;
-  }
-
-  const match = image.match(
-    /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/]+={0,2})$/
-  );
-
-  if (!match) {
-    return null;
-  }
-
-  const mimeType = match[1];
-  const base64Data = match[2];
-  const buffer = Buffer.from(base64Data, "base64");
-
-  // Reject malformed Base64.
-  if (buffer.toString("base64") !== base64Data) {
-    return null;
-  }
-
-  if (
-    buffer.length < 1000 ||
-    buffer.length > MAX_IMAGE_BYTES
-  ) {
-    return null;
-  }
-
-  const signatureCheck = IMAGE_SIGNATURES[mimeType];
-
-  if (!signatureCheck || !signatureCheck(buffer)) {
-    return null;
-  }
-
-  return { mimeType, buffer };
-}
-
-function cleanStringArray(value, maxItems = 4) {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  return value
-    .filter(
-      (item) =>
-        typeof item === "string" &&
-        item.trim().length > 0
-    )
-    .slice(0, maxItems)
-    .map((item) => item.trim().slice(0, 300));
-}
 
 const analyzeHair = async (req, res) => {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      console.error(
-        "Hair analysis unavailable: OPENAI_API_KEY is missing."
-      );
+    const { hairType, concern } = req.body || {};
 
-      return sendError(
-        res,
-        503,
-        "Hair analysis is not configured yet. Please try again later."
-      );
+    if (!ALLOWED_HAIR_TYPES.includes(hairType)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please select a valid hair type.",
+      });
     }
 
-    const { image, hairType, concern } = req.body || {};
+    const guide = CARE_GUIDES[concern];
 
-    if (
-      !ALLOWED_HAIR_TYPES.includes(hairType) ||
-      !ALLOWED_CONCERNS.includes(concern)
-    ) {
-      return sendError(
-        res,
-        400,
-        "Please select a valid hair type and concern."
-      );
+    if (!guide) {
+      return res.status(400).json({
+        success: false,
+        message: "Please select a valid hair-care concern.",
+      });
     }
 
-    const parsedImage = parseImage(image);
-
-    if (!parsedImage) {
-      return sendError(
-        res,
-        400,
-        "Please upload a valid JPEG, PNG, or WebP image under 7 MB."
-      );
-    }
-
-    const { mimeType, buffer } = parsedImage;
-
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-
-    const dataUrl =
-      `data:${mimeType};base64,${buffer.toString("base64")}`;
-
-    const response = await openai.responses.create({
-      model: "gpt-4.1-mini",
-
-      instructions: `
-You are STYLAURA's cosmetic hair-care assistant.
-
-Analyze the supplied image for suitability for a cosmetic hair-care review.
-A suitable image should clearly show hair or scalp. A face is not required.
-
-Reject unrelated images, blank images, and images where hair or scalp
-cannot reasonably be assessed.
-
-Return a valid JSON object with exactly these fields:
-{
-  "validImage": true,
-  "summary": "A short, cautious cosmetic summary",
-  "observations": ["Visible characteristic"],
-  "recommendations": ["General cosmetic care suggestion"]
-}
-
-If the image is unsuitable, return:
-{
-  "validImage": false,
-  "summary": "The image does not clearly show hair or scalp.",
-  "observations": [],
-  "recommendations": []
-}
-
-Only describe characteristics visible in the image. Lighting, focus,
-styling, and image quality may limit observations.
-
-Do not diagnose scalp disease or dandruff. Do not determine the cause
-of hair loss or claim to measure hydration or sensitivity from a photo.
-
-Do not invent observations that cannot be seen.
-
-Recommendations must be general, practical cosmetic-care suggestions.
-Return no more than four observations and four recommendations.
-Do not provide medical diagnoses or treatment instructions.
-
-The output must be JSON only, with no Markdown fences or extra text.
-`,
-
-      input: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "input_text",
-              text:
-                `Selected hair type: ${hairType}. ` +
-                `Main concern: ${concern}. ` +
-                "Review this image for a cosmetic hair-care routine. " +
-                "Return the result as a valid JSON object.",
-            },
-            {
-              type: "input_image",
-              image_url: dataUrl,
-              detail: "high",
-            },
-          ],
-        },
-      ],
-
-      text: {
-        format: {
-          type: "json_object",
-        },
-      },
-    });
-
-    const output = response.output_text;
-
-    if (!output) {
-      console.error(
-        "Hair analysis returned an empty response."
-      );
-
-      return sendError(
-        res,
-        502,
-        "We couldn't read the analysis. Please try again."
-      );
-    }
-
-    let analysis;
-
-    try {
-      analysis = JSON.parse(output);
-    } catch {
-      console.error(
-        "Hair analysis returned invalid JSON."
-      );
-
-      return sendError(
-        res,
-        502,
-        "The analysis response was invalid. Please try again."
-      );
-    }
-
-    if (
-      !analysis ||
-      typeof analysis !== "object" ||
-      Array.isArray(analysis) ||
-      typeof analysis.validImage !== "boolean"
-    ) {
-      return sendError(
-        res,
-        502,
-        "The analysis response was incomplete. Please try again."
-      );
-    }
-
-    if (analysis.validImage === false) {
-      return sendError(
-        res,
-        422,
-        "This photo does not clearly show hair or scalp. Please upload a clear hair photo."
-      );
-    }
-
-    if (
-      typeof analysis.summary !== "string" ||
-      !analysis.summary.trim() ||
-      !Array.isArray(analysis.observations) ||
-      !Array.isArray(analysis.recommendations)
-    ) {
-      return sendError(
-        res,
-        502,
-        "The analysis response was incomplete. Please try again."
-      );
-    }
+    const typeAdvice = {
+      Straight:
+        "Keep products lightweight if your hair gets weighed down easily.",
+      Wavy:
+        "Try gentle scrunching and avoid brushing waves excessively when dry.",
+      Curly:
+        "Consider detangling gently while conditioned to help preserve curl shape.",
+      Coily:
+        "Consider gentle section-by-section detangling and regular conditioning.",
+    };
 
     return res.status(200).json({
       success: true,
+      mode: "rule_based",
+      message:
+        "This is a free general-care guide. Your uploaded photo has not been analyzed.",
       analysis: {
-        validImage: true,
-        summary: analysis.summary.trim().slice(0, 1200),
-        observations: cleanStringArray(
-          analysis.observations
-        ),
-        recommendations: cleanStringArray(
-          analysis.recommendations
-        ),
+        mode: "rule_based",
+        validImage: null,
+        photoAnalyzed: false,
+        summary: guide.summary,
+        observations: guide.observations,
+        recommendations: [
+          typeAdvice[hairType],
+          ...guide.recommendations,
+        ].slice(0, 4),
       },
     });
   } catch (error) {
-    // Never log the API key or submitted image.
     console.error(
-      "Hair analysis error:",
-      error.status || "",
+      "Free hair-care assessment error:",
       error.message || "Unknown error"
     );
 
-    if (
-      error.status === 401 ||
-      error.status === 403
-    ) {
-      return sendError(
-        res,
-        503,
-        "The AI service credentials need to be checked."
-      );
-    }
-
-    if (error.status === 429) {
-      return sendError(
-        res,
-        429,
-        "The AI service is busy or its usage limit has been reached. Please try again later."
-      );
-    }
-
-    return sendError(
-      res,
-      502,
-      "Hair analysis failed. Please try again shortly."
-    );
+    return res.status(500).json({
+      success: false,
+      message: "We couldn't prepare your care guide. Please try again.",
+    });
   }
 };
 
