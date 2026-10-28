@@ -1,5 +1,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import * as faceapi from "@vladmandic/face-api";
 import { useNavigate } from "react-router-dom";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -7,6 +8,30 @@ const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 function SkinAnalysis() {
   const navigate = useNavigate();
+  const [faceModelReady, setFaceModelReady] = useState(false);
+const [checkingFace, setCheckingFace] = useState(false);
+
+useEffect(() => {
+  let cancelled = false;
+
+  faceapi.nets.tinyFaceDetector
+    .loadFromUri("/models")
+    .then(() => {
+      if (!cancelled) setFaceModelReady(true);
+    })
+    .catch((error) => {
+      console.error("Face detection model failed to load:", error);
+      if (!cancelled) {
+        setImageError(
+          "Face detection could not load. Please refresh the page and try again."
+        );
+      }
+    });
+
+  return () => {
+    cancelled = true;
+  };
+}, []);
 
   const [image, setImage] = useState("");
   const [cameraOpen, setCameraOpen] = useState(false);
@@ -46,12 +71,66 @@ function SkinAnalysis() {
     }
   }, []);
 
-  const loadImage = useCallback((dataUrl) => {
-    setImageError("");
-    setIsImageLoading(true);
+  
+const loadImage = useCallback(async (dataUrl) => {
+  setImageError("");
+
+  if (!faceModelReady) {
+    setImageError(
+      "Face detection is still loading. Please wait a moment and try again."
+    );
+    return;
+  }
+
+  setCheckingFace(true);
+
+  try {
+    const testImage = new Image();
+
+    await new Promise((resolve, reject) => {
+      testImage.onload = resolve;
+      testImage.onerror = () =>
+        reject(new Error("Unable to read this photo."));
+      testImage.src = dataUrl;
+    });
+
+    const detections = await faceapi.detectAllFaces(
+      testImage,
+      new faceapi.TinyFaceDetectorOptions({
+        inputSize: 320,
+        scoreThreshold: 0.5,
+      })
+    );
+
+    if (detections.length === 0) {
+      imageRef.current = "";
+      setImage("");
+      setImageError(
+        "No face detected. Please upload a clear, front-facing photo of your face."
+      );
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      return;
+    }
+
     imageRef.current = dataUrl;
+    setIsImageLoading(true);
     setImage(dataUrl);
-  }, []);
+  } catch (error) {
+    console.error("Face detection failed:", error);
+    imageRef.current = "";
+    setImage("");
+    setImageError(
+      "Unable to check this photo. Please try another image."
+    );
+  } finally {
+    setCheckingFace(false);
+  }
+}, [faceModelReady]);
+
 
   const handleFileChange = async (event) => {
     const file = event.target.files?.[0];
@@ -392,7 +471,7 @@ function SkinAnalysis() {
             type="button"
             className="analysis-continue"
             onClick={handleContinue}
-            disabled={!image || isImageLoading}
+            disabled={!image || isImageLoading || checkingFace || !faceModelReady}
           >
             Continue to Analysis <span aria-hidden="true">→</span>
           </button>
