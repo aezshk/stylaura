@@ -31,6 +31,7 @@ connectDB();
 // Middleware.
 
 
+
 const allowedOrigins = [
   "http://localhost:5173",
   "https://stylaura-5axp.vercel.app",
@@ -46,8 +47,9 @@ app.use(
         return callback(null, true);
       }
 
-      return callback(new Error("Not allowed by CORS"));
-    },
+return callback(
+  new Error(`Not allowed by CORS: ${origin}`)
+);    },
     credentials: true,
   })
 );
