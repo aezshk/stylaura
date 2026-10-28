@@ -62,10 +62,9 @@ function parseImage(image) {
 
   const mimeType = match[1];
   const base64Data = match[2];
-
-  // Reject malformed Base64 rather than silently accepting it.
   const buffer = Buffer.from(base64Data, "base64");
 
+  // Reject malformed Base64.
   if (buffer.toString("base64") !== base64Data) {
     return null;
   }
@@ -140,7 +139,6 @@ const analyzeHair = async (req, res) => {
 
     const { mimeType, buffer } = parsedImage;
 
-    // Initialize only after confirming that the key exists.
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
@@ -154,14 +152,13 @@ const analyzeHair = async (req, res) => {
       instructions: `
 You are STYLAURA's cosmetic hair-care assistant.
 
-Review the supplied image for suitability for a hair-care review.
-A suitable image should clearly show hair or scalp. A face is not
-required.
+Analyze the supplied image for suitability for a cosmetic hair-care review.
+A suitable image should clearly show hair or scalp. A face is not required.
 
 Reject unrelated images, blank images, and images where hair or scalp
 cannot reasonably be assessed.
 
-Return a JSON object with exactly these fields:
+Return a valid JSON object with exactly these fields:
 {
   "validImage": true,
   "summary": "A short, cautious cosmetic summary",
@@ -182,11 +179,14 @@ styling, and image quality may limit observations.
 
 Do not diagnose scalp disease or dandruff. Do not determine the cause
 of hair loss or claim to measure hydration or sensitivity from a photo.
+
 Do not invent observations that cannot be seen.
 
 Recommendations must be general, practical cosmetic-care suggestions.
 Return no more than four observations and four recommendations.
 Do not provide medical diagnoses or treatment instructions.
+
+The output must be JSON only, with no Markdown fences or extra text.
 `,
 
       input: [
@@ -198,7 +198,8 @@ Do not provide medical diagnoses or treatment instructions.
               text:
                 `Selected hair type: ${hairType}. ` +
                 `Main concern: ${concern}. ` +
-                "Review this image for a cosmetic hair-care routine.",
+                "Review this image for a cosmetic hair-care routine. " +
+                "Return the result as a valid JSON object.",
             },
             {
               type: "input_image",
@@ -209,7 +210,6 @@ Do not provide medical diagnoses or treatment instructions.
         },
       ],
 
-      // Ask the model for structured JSON output.
       text: {
         format: {
           type: "json_object",
@@ -220,7 +220,9 @@ Do not provide medical diagnoses or treatment instructions.
     const output = response.output_text;
 
     if (!output) {
-      console.error("Hair analysis returned an empty response.");
+      console.error(
+        "Hair analysis returned an empty response."
+      );
 
       return sendError(
         res,
@@ -234,7 +236,9 @@ Do not provide medical diagnoses or treatment instructions.
     try {
       analysis = JSON.parse(output);
     } catch {
-      console.error("Hair analysis returned invalid JSON.");
+      console.error(
+        "Hair analysis returned invalid JSON."
+      );
 
       return sendError(
         res,
@@ -243,45 +247,30 @@ Do not provide medical diagnoses or treatment instructions.
       );
     }
 
-    if (typeof analysis.validImage !== "boolean") {
-  return sendError(
-    res,
-    502,
-    "The analysis response was incomplete. Please try again."
-  );
-}
+    if (
+      !analysis ||
+      typeof analysis !== "object" ||
+      Array.isArray(analysis) ||
+      typeof analysis.validImage !== "boolean"
+    ) {
+      return sendError(
+        res,
+        502,
+        "The analysis response was incomplete. Please try again."
+      );
+    }
 
-if (analysis.validImage === false) {
-  return sendError(
-    res,
-    422,
-    "This photo does not clearly show hair or scalp. Please upload a clear hair photo."
-  );
-}
-
-if (
-  typeof analysis.summary !== "string" ||
-  !analysis.summary.trim() ||
-  !Array.isArray(analysis.observations) ||
-  !Array.isArray(analysis.recommendations)
-) {
-  return sendError(
-    res,
-    502,
-    "The analysis response was incomplete. Please try again."
-  );
-}
-
-    if (!analysis.validImage) {
+    if (analysis.validImage === false) {
       return sendError(
         res,
         422,
-        "This photo does not clearly show hair or scalp. Please upload a clearer photo."
+        "This photo does not clearly show hair or scalp. Please upload a clear hair photo."
       );
     }
 
     if (
       typeof analysis.summary !== "string" ||
+      !analysis.summary.trim() ||
       !Array.isArray(analysis.observations) ||
       !Array.isArray(analysis.recommendations)
     ) {
@@ -294,7 +283,6 @@ if (
 
     return res.status(200).json({
       success: true,
-
       analysis: {
         validImage: true,
         summary: analysis.summary.trim().slice(0, 1200),
