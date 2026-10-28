@@ -1,3 +1,4 @@
+
 import {
   Link,
   NavLink,
@@ -13,8 +14,7 @@ function Navbar() {
 
   const { user, loading, logout } = useAuth();
 
-  const showBackButton =
-    location.pathname !== "/";
+  const showBackButton = location.pathname !== "/";
 
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -24,85 +24,121 @@ function Navbar() {
     }
   };
 
+  const getNavLinkClass = ({ isActive }) =>
+    `navbar-link${isActive ? " active" : ""}`;
+
+  const getActionLinkClass = ({ isActive }) =>
+    `navbar-action-link${isActive ? " active" : ""}`;
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/", { replace: true });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   return (
     <header className="stylaura-navbar">
       <div className="navbar-container">
-
         <div className="navbar-left">
           {showBackButton && (
             <button
               type="button"
               className="navbar-back"
               onClick={handleBack}
+              aria-label="Go to previous page"
             >
-              ← Back
+              <span aria-hidden="true">←</span> Back
             </button>
           )}
 
           <Link
             to="/"
             className="navbar-logo"
+            aria-label="STYLAURA home"
           >
             STYLAURA
           </Link>
         </div>
 
-
-        <nav className="navbar-links">
-          <NavLink to="/" end>
+        <nav
+          className="navbar-links"
+          aria-label="Main navigation"
+        >
+          <NavLink
+            to="/"
+            end
+            className={getNavLinkClass}
+          >
             Home
           </NavLink>
 
-          <NavLink to="/skin-analysis">
+          <NavLink
+            to="/skin-analysis"
+            className={getNavLinkClass}
+          >
             Skin
           </NavLink>
 
-          <NavLink to="/hair-analysis">
+          <NavLink
+            to="/hair-analysis"
+            className={getNavLinkClass}
+          >
             Hair
           </NavLink>
 
-          <NavLink to="/colour-analysis">
+          <NavLink
+            to="/colour-analysis"
+            className={getNavLinkClass}
+          >
             Colour
           </NavLink>
 
-          <NavLink to="/products">
+          <NavLink
+            to="/products"
+            className={getNavLinkClass}
+          >
             Products
           </NavLink>
         </nav>
 
-
         <div className="navbar-actions">
-
-          {!loading && user ? (
+          {loading ? (
+            <span
+              className="navbar-loading"
+              aria-live="polite"
+            >
+              Loading...
+            </span>
+          ) : user ? (
             <>
-              <Link
+              <NavLink
                 to="/dashboard"
-                className="navbar-action-link"
+                className={getActionLinkClass}
               >
                 Profile
-              </Link>
+              </NavLink>
 
-              <Link
+              <NavLink
                 to="/orders"
-                className="navbar-action-link"
+                className={getActionLinkClass}
               >
                 Orders
-              </Link>
+              </NavLink>
 
-              <Link
+              <NavLink
                 to="/cart"
-                className="navbar-action-link"
+                className={getActionLinkClass}
               >
                 Cart
-              </Link>
+              </NavLink>
 
               <button
                 type="button"
                 className="navbar-logout"
-                onClick={async () => {
-                  await logout();
-                  navigate("/");
-                }}
+                onClick={handleLogout}
               >
                 Logout
               </button>
@@ -111,7 +147,7 @@ function Navbar() {
             <>
               <NavLink
                 to="/login"
-                className="navbar-action-link"
+                className={getActionLinkClass}
               >
                 Sign In
               </NavLink>
@@ -124,9 +160,7 @@ function Navbar() {
               </Link>
             </>
           )}
-
         </div>
-
       </div>
     </header>
   );
