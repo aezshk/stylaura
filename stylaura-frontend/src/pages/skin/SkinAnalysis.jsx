@@ -1,198 +1,243 @@
-import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 function SkinAnalysis() {
   const navigate = useNavigate();
 
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState("");
   const [cameraOpen, setCameraOpen] = useState(false);
+  const [cameraLoading, setCameraLoading] = useState(false);
   const [cameraError, setCameraError] = useState("");
+  const [imageError, setImageError] = useState("");
+  const [isImageLoading, setIsImageLoading] = useState(false);
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const imageRef = useRef("");
 
-  /* =========================
-     FILE UPLOAD
-  ========================== */
+  const stopCamera = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
 
-  const handleFileChange = (event) => {
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+
+    setCameraOpen(false);
+    setCameraLoading(false);
+  }, []);
+
+  const clearImage = useCallback(() => {
+    imageRef.current = "";
+    setImage("");
+    setImageError("");
+    setIsImageLoading(false);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }, []);
+
+  const loadImage = useCallback((dataUrl) => {
+    setImageError("");
+    setIsImageLoading(true);
+    imageRef.current = dataUrl;
+    setImage(dataUrl);
+  }, []);
+
+  const handleFileChange = async (event) => {
     const file = event.target.files?.[0];
 
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      setCameraError("Please choose a valid image file.");
+    setCameraError("");
+    setImageError("");
+
+    if (!ACCEPTED_TYPES.includes(file.type)) {
+      setImageError("Please upload a JPG, PNG, or WebP image.");
+      event.target.value = "";
       return;
     }
 
-    setCameraError("");
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      setImage(reader.result);
-    };
-
-    reader.readAsDataURL(file);
-  };
-
-
-  /* =========================
-     CAMERA
-  ========================== */
-
-  const openCamera = async () => {
-    setCameraError("");
+    if (file.size > MAX_FILE_SIZE) {
+      setImageError("Your photo must be smaller than 10 MB.");
+      event.target.value = "";
+      return;
+    }
 
     try {
-      if (!navigator.mediaDevices?.getUserMedia) {
-        setCameraError(
-          "Camera access is not supported by this browser."
-        );
-        return;
-      }
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
 
-      const stream =
-        await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: "user",
-          },
-          audio: false,
-        });
+        reader.onload = () => {
+          if (typeof reader.result !== "string") {
+            reject(new Error("The image could not be read."));
+            return;
+          }
 
-      streamRef.current = stream;
+          resolve(reader.result);
+        };
 
-      setCameraOpen(true);
+        reader.onerror = () => reject(new Error("The image could not be read."));
+        reader.readAsDataURL(file);
+      });
 
-      /*
-       * Give React time to render the video element
-       * before assigning the stream.
-       */
-      setTimeout(() => {
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-      }, 100);
+      // Verify that the file is a decodable image.
+      await new Promise((resolve, reject) => {
+        const testImage = new Image();
 
+        testImage.onload = () => {
+          if (!testImage.naturalWidth || !testImage.naturalHeight) {
+            reject(new Error("This image is invalid or unreadable."));
+            return;
+          }
+
+          if (testImage.naturalWidth < 160 || testImage.naturalHeight < 160) {
+            reject(new Error("Please choose a higher-resolution photo."));
+            return;
+          }
+
+          resolve();
+        };
+
+        testImage.onerror = () => reject(new Error("This image is invalid or unreadable."));
+        testImage.src = dataUrl;
+      });
+
+      stopCamera();
+      loadImage(dataUrl);
     } catch (error) {
-      console.error("Camera error:", error);
-
-      setCameraError(
-        "Unable to access your camera. Please check your browser permissions."
-      );
+      setImageError(error.message || "Unable to load this image.");
     }
   };
 
+  const openCamera = async () => {
+    setCameraError("");
+    setImageError("");
 
-  /* =========================
-     CAPTURE PHOTO
-  ========================== */
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setCameraError(
+        "Camera access is unavailable. Use HTTPS or upload a photo instead."
+      );
+      return;
+    }
+
+    setCameraLoading(true);
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: {
+          facingMode: { ideal: "user" },
+          width: { ideal: 1280 },
+          height: { ideal: 1280 },
+        },
+      });
+
+      streamRef.current = stream;
+      setCameraOpen(true);
+    } catch (error) {
+      console.error("Camera access failed:", error);
+
+      const messages = {
+        NotAllowedError:
+          "Camera permission was denied. Allow camera access in your browser settings.",
+        NotFoundError:
+          "No available camera was found. Please upload a photo instead.",
+        NotReadableError:
+          "Your camera may already be in use by another application.",
+        OverconstrainedError:
+          "Your camera does not support these settings. Try uploading a photo.",
+      };
+
+      setCameraError(
+        messages[error.name] ||
+          "Unable to open your camera. Please upload a photo instead."
+      );
+    } finally {
+      setCameraLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!cameraOpen || !streamRef.current || !videoRef.current) return;
+
+    const video = videoRef.current;
+    video.srcObject = streamRef.current;
+
+    video.play().catch((error) => {
+      console.warn("Video preview could not start:", error);
+      setCameraError("Unable to start the camera preview. Please try again.");
+    });
+  }, [cameraOpen]);
 
   const capturePhoto = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
 
-    if (!video || !canvas) return;
+    if (!video || !canvas || !video.videoWidth || !video.videoHeight) {
+      setCameraError("Please wait until the camera preview is ready.");
+      return;
+    }
 
-    const width = video.videoWidth || 640;
-    const height = video.videoHeight || 480;
+    const maxDimension = 1600;
+    const scale = Math.min(
+      1,
+      maxDimension / Math.max(video.videoWidth, video.videoHeight)
+    );
 
-    canvas.width = width;
-    canvas.height = height;
+    canvas.width = Math.round(video.videoWidth * scale);
+    canvas.height = Math.round(video.videoHeight * scale);
 
     const context = canvas.getContext("2d");
 
-    context.drawImage(
-      video,
-      0,
-      0,
-      width,
-      height
-    );
-
-    const capturedImage =
-      canvas.toDataURL("image/jpeg", 0.9);
-
-    setImage(capturedImage);
-
-    closeCamera();
-  };
-
-
-  /* =========================
-     CLOSE CAMERA
-  ========================== */
-
-  const closeCamera = () => {
-    if (streamRef.current) {
-      streamRef.current
-        .getTracks()
-        .forEach((track) => track.stop());
-
-      streamRef.current = null;
+    if (!context) {
+      setCameraError("Unable to capture the photo. Please try again.");
+      return;
     }
 
-    setCameraOpen(false);
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const capturedImage = canvas.toDataURL("image/jpeg", 0.88);
+
+    stopCamera();
+    loadImage(capturedImage);
   };
 
-
-  /* =========================
-     CONTINUE
-  ========================== */
-
   const handleContinue = () => {
-    if (!image) {
-      setCameraError(
-        "Please upload a photo or take a photo before continuing."
-      );
+    if (!imageRef.current) {
+      setImageError("Please upload or capture a photo first.");
       return;
     }
 
     navigate("/skin-analysis/result", {
       state: {
-        image,
+        image: imageRef.current,
       },
     });
   };
 
-
-  /* =========================
-     CLEAN CAMERA ON EXIT
-  ========================== */
-
   useEffect(() => {
     return () => {
       if (streamRef.current) {
-        streamRef.current
-          .getTracks()
-          .forEach((track) => track.stop());
+        streamRef.current.getTracks().forEach((track) => track.stop());
       }
     };
   }, []);
 
-
   return (
     <main className="analysis-page skin-analysis-page">
-
-      {/* =====================================
-          TOP PROGRESS
-      ====================================== */}
-
-      
-
-
-      {/* =====================================
-          MAIN CONTENT
-      ====================================== */}
-
       <section className="analysis-main">
-
-        <div className="analysis-intro">
-
-          <p className="eyebrow">
-            STYLAURA • SKIN ANALYSIS
-          </p>
+        <header className="analysis-intro">
+          <p className="eyebrow">STYLAURA · SKIN ANALYSIS</p>
 
           <h1>
             Discover your
@@ -201,143 +246,91 @@ function SkinAnalysis() {
           </h1>
 
           <p className="analysis-description">
-            Upload a clear photo or use your camera
-            to begin your personalized skin analysis.
+            Upload a clear, front-facing photo in natural lighting.
+            We'll check whether your image is suitable before analysing it.
           </p>
-
-        </div>
-
-
-        {/* =====================================
-            UPLOAD / CAMERA AREA
-        ====================================== */}
+        </header>
 
         <div className="skin-analysis-workspace">
-
-          {/* LEFT SIDE */}
           <div className="analysis-options">
-
-            <div className="analysis-option-card">
-
-              <div className="option-icon">
-                ↑
-              </div>
+            <article className="analysis-option-card">
+              <div className="option-icon" aria-hidden="true">↑</div>
 
               <div className="option-content">
-
-                <p className="option-number">
-                  OPTION 01
-                </p>
-
-                <h2>
-                  Upload a Photo
-                </h2>
-
-                <p>
-                  Choose a clear, well-lit photo
-                  from your device.
-                </p>
-
+                <p className="option-number">OPTION 01</p>
+                <h2>Upload a Photo</h2>
+                <p>Choose a clear JPG, PNG, or WebP photo under 10 MB.</p>
               </div>
 
               <label className="upload-button">
                 Choose Photo
-
                 <input
+                  ref={fileInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp"
                   onChange={handleFileChange}
                 />
               </label>
+            </article>
 
-            </div>
-
-
-            <div className="analysis-divider">
+            <div className="analysis-divider" aria-hidden="true">
               <span />
               <p>OR</p>
               <span />
             </div>
 
-
-            <div className="analysis-option-card">
-
-              <div className="option-icon">
-                ◉
-              </div>
+            <article className="analysis-option-card">
+              <div className="option-icon" aria-hidden="true">◉</div>
 
               <div className="option-content">
-
-                <p className="option-number">
-                  OPTION 02
-                </p>
-
-                <h2>
-                  Use Camera
-                </h2>
-
-                <p>
-                  Take a photo directly using
-                  your device camera.
-                </p>
-
+                <p className="option-number">OPTION 02</p>
+                <h2>Use Camera</h2>
+                <p>Capture a photo directly from your device.</p>
               </div>
 
               <button
                 type="button"
                 className="camera-button"
                 onClick={openCamera}
+                disabled={cameraLoading}
               >
-                Open Camera
+                {cameraLoading ? "Opening Camera…" : "Open Camera"}
               </button>
-
-            </div>
-
+            </article>
           </div>
 
-
-          {/* RIGHT SIDE */}
-          <div className="analysis-preview">
-
+          <section
+            className="analysis-preview"
+            aria-label="Photo preview"
+            aria-live="polite"
+          >
             {!image && !cameraOpen && (
               <div className="preview-empty">
-
-                <div className="preview-symbol">
-                  ✦
-                </div>
-
+                <div className="preview-symbol" aria-hidden="true">✦</div>
                 <h3>
                   Your photo
                   <br />
                   will appear here.
                 </h3>
-
-                <p>
-                  For the best analysis,
-                  use a clear photo in
-                  natural lighting.
-                </p>
-
+                <p>Use a clear, well-lit photo for the best results.</p>
               </div>
             )}
 
-
             {cameraOpen && (
               <div className="camera-view">
-
                 <video
                   ref={videoRef}
                   autoPlay
                   playsInline
                   muted
+                  aria-label="Live camera preview"
                 />
 
                 <div className="camera-controls">
-
                   <button
                     type="button"
                     className="secondary-button"
-                    onClick={closeCamera}
+                    onClick={stopCamera}
                   >
                     Cancel
                   </button>
@@ -349,83 +342,64 @@ function SkinAnalysis() {
                   >
                     Capture Photo
                   </button>
-
                 </div>
-
               </div>
             )}
-
 
             {image && !cameraOpen && (
               <div className="image-preview">
-
                 <img
                   src={image}
-                  alt="Skin analysis preview"
+                  alt="Uploaded photo preview for skin analysis"
+                  onLoad={() => setIsImageLoading(false)}
+                  onError={() => {
+                    clearImage();
+                    setImageError("Unable to display this photo. Please try another.");
+                  }}
                 />
 
-                <div className="preview-overlay">
+                {isImageLoading && (
+                  <p className="preview-loading">Loading photo…</p>
+                )}
 
+                <div className="preview-overlay">
                   <button
                     type="button"
                     className="secondary-button"
-                    onClick={() => setImage(null)}
+                    onClick={clearImage}
                   >
                     Choose Another
                   </button>
-
                 </div>
-
               </div>
             )}
-
-          </div>
-
+          </section>
         </div>
 
-
-        {/* =====================================
-            ERROR
-        ====================================== */}
-
-        {cameraError && (
-          <div className="analysis-error">
-            {cameraError}
+        {(cameraError || imageError) && (
+          <div className="analysis-error" role="alert">
+            {imageError || cameraError}
           </div>
         )}
 
-
-        {/* =====================================
-            CONTINUE
-        ====================================== */}
-
-        <div className="analysis-bottom">
-
+        <footer className="analysis-bottom">
           <p>
-            Your photo is used to create
-            your personalized beauty profile.
+            Upload only a photo you're comfortable using for this analysis.
+            An image upload alone does not establish a skin condition.
           </p>
 
           <button
             type="button"
             className="analysis-continue"
             onClick={handleContinue}
-            disabled={!image}
+            disabled={!image || isImageLoading}
           >
-            Continue to Analysis
-            <span>→</span>
+            Continue to Analysis <span aria-hidden="true">→</span>
           </button>
-
-        </div>
-
+        </footer>
       </section>
 
-
-      <canvas
-        ref={canvasRef}
-        style={{ display: "none" }}
-      />
-
+      <canvas ref={canvasRef} hidden />
     </main>
   );
 }

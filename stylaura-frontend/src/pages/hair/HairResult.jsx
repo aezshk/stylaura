@@ -1,24 +1,40 @@
+
 import API_BASE_URL from "../../api";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 
 function HairResult() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { checkAuth } = useAuth();
 
-
-  const hairType = location.state?.hairType || "Wavy";
-  const concern = location.state?.concern || "Frizz";
+  const hairType = location.state?.hairType;
+  const concern = location.state?.concern;
   const image = location.state?.image;
 
-  const [saveStatus, setSaveStatus] = useState("saving");
+  const [status, setStatus] = useState("analyzing");
+  const [analysis, setAnalysis] = useState(null);
+  const [error, setError] = useState("");
+  const [saveStatus, setSaveStatus] = useState("idle");
 
   useEffect(() => {
-    const saveProfile = async () => {
+    if (!image || !hairType || !concern) {
+      navigate("/hair-analysis", { replace: true });
+      return;
+    }
+
+    let cancelled = false;
+
+    async function analyzeHair() {
+      setStatus("analyzing");
+      setError("");
+      setAnalysis(null);
+      setSaveStatus("idle");
+
       try {
         const response = await fetch(
-          `${API_BASE_URL}/api/auth/hair-profile`,
+          `${API_BASE_URL}/api/analysis/hair`,
           {
             method: "POST",
             headers: {
@@ -26,43 +42,167 @@ function HairResult() {
             },
             credentials: "include",
             body: JSON.stringify({
-              image: image || null,
+              image,
               hairType,
               concern,
             }),
           }
         );
 
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
 
         if (!response.ok) {
           throw new Error(
-            data.message || "Unable to save hair profile."
+            data.message || "Unable to analyze this photo."
           );
         }
 
-        setSaveStatus("saved");
-      } catch (error) {
-        console.error(
-          "Hair profile save error:",
-          error
+        if (
+  !data.success ||
+  !data.analysis ||
+  data.analysis.validImage !== true ||
+  typeof data.analysis.summary !== "string" ||
+  !Array.isArray(data.analysis.observations) ||
+  !Array.isArray(data.analysis.recommendations)
+) {
+  throw new Error(
+    "This photo could not be verified for hair analysis. Please upload a clear photo showing hair or scalp."
+  );
+}
+
+        if (data.analysis.validImage !== true) {
+          throw new Error(
+            "This photo could not be verified as suitable for hair analysis. Please upload a clear photo showing your hair or scalp."
+          );
+        }
+
+        if (cancelled) return;
+
+        setAnalysis(data.analysis);
+        setStatus("success");
+      } catch (err) {
+        if (cancelled) return;
+
+        console.error("Hair analysis error:", err);
+        setError(
+          err.message ||
+            "Something went wrong. Please try another photo."
         );
-
-        setSaveStatus("error");
+        setStatus("error");
       }
-    };
+    }
 
-    saveProfile();
-  }, [image, hairType, concern]);
+    analyzeHair();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [image, hairType, concern, navigate]);
+
+  const handleSaveProfile = async () => {
+    if (!analysis || saveStatus === "saving") return;
+
+    setSaveStatus("saving");
+    setError("");
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/auth/hair-profile`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            image,
+            hairType,
+            concern,
+            analysis,
+          }),
+        }
+      );
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            "Unable to save your hair profile. Please sign in again."
+        );
+      }
+
+      setSaveStatus("saved");
+
+      if (typeof checkAuth === "function") {
+        await checkAuth();
+      }
+    } catch (err) {
+      console.error("Hair profile save error:", err);
+      setError(err.message || "Unable to save your profile.");
+      setSaveStatus("error");
+    }
+  };
+
+  if (status === "analyzing") {
+    return (
+      <main className="result-page hair-result-page">
+        <section className="result-intro">
+          <p className="eyebrow">STYLAURA · HAIR ANALYSIS</p>
+          <h1>
+            Understanding your
+            <br />
+            <em>hair needs.</em>
+          </h1>
+          <p>
+            We're checking your photo before preparing your
+            personalized results.
+          </p>
+          <p role="status" aria-live="polite">
+            Analysis in progress…
+          </p>
+        </section>
+      </main>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <main className="result-page hair-result-page">
+        <section className="result-intro">
+          <p className="eyebrow">STYLAURA · HAIR ANALYSIS</p>
+          <h1>
+            Let's try
+            <br />
+            <em>another photo.</em>
+          </h1>
+          <p className="auth-error" role="alert">
+            {error}
+          </p>
+          <button
+            type="button"
+            className="primary-button"
+            onClick={() => navigate("/hair-analysis")}
+          >
+            Try Again
+          </button>
+        </section>
+      </main>
+    );
+  }
+
+  const observations = Array.isArray(analysis.observations)
+    ? analysis.observations
+    : [];
+
+  const recommendations = Array.isArray(analysis.recommendations)
+    ? analysis.recommendations
+    : [];
 
   return (
     <main className="result-page hair-result-page">
-
       <section className="result-intro">
-
-        <p className="eyebrow">
-          STYLAURA • YOUR HAIR PROFILE
-        </p>
+        <p className="eyebrow">STYLAURA · YOUR HAIR PROFILE</p>
 
         <h1>
           Your hair,
@@ -71,142 +211,133 @@ function HairResult() {
         </h1>
 
         <p>
-          Your answers give us a starting point
-          for understanding your hair and creating
-          a more personalized care routine.
+          Here are the observations available from your submitted photo
+          and the preferences you selected. Image-based observations
+          are estimates, not a medical diagnosis.
         </p>
 
         {saveStatus === "saved" && (
-          <p className="profile-save-status">
+          <p className="profile-save-status" role="status">
             Your profile has been saved.
           </p>
         )}
 
-        {saveStatus === "error" && (
-          <p className="auth-error">
-            We couldn't save your profile.
-            Please make sure you're logged in.
+        {error && (
+          <p className="auth-error" role="alert">
+            {error}
           </p>
         )}
-
       </section>
 
       <section className="result-content">
-
         <div className="result-main-card hair-result-main">
-
           <div className="result-card-header">
-
             <div>
-
-              <p className="result-label">
-                HAIR PROFILE
-              </p>
-
-              <h2>
-                {hairType}
-              </h2>
-
+              <p className="result-label">HAIR PROFILE</p>
+              <h2>{hairType}</h2>
             </div>
 
             <span className="result-score">
-              PERSONALIZED PROFILE
+              PHOTO REVIEW COMPLETE
             </span>
-
           </div>
 
           <div className="hair-result-photo">
-
-            {image ? (
-              <img
-                src={image}
-                alt="Hair analysis"
-              />
-            ) : (
-              <div className="hair-result-placeholder">
-
-                <span>
-                  ✦
-                </span>
-
-                <p>
-                  No hair photo was provided.
-                </p>
-
-              </div>
-            )}
-
+            <img src={image} alt="Photo submitted for hair analysis" />
           </div>
 
           <div className="result-stats">
-
             <div>
-              <span>Hair Type</span>
+              <span>Your Hair Type</span>
               <strong>{hairType}</strong>
             </div>
 
             <div>
-              <span>Main Concern</span>
+              <span>Your Main Concern</span>
               <strong>{concern}</strong>
             </div>
 
             <div>
-              <span>Routine Focus</span>
-              <strong>Care & Balance</strong>
+              <span>Image Review</span>
+              <strong>Completed</strong>
             </div>
-
           </div>
 
+          <section className="hair-observations">
+            <h3>Photo observations</h3>
+
+            {observations.length > 0 ? (
+              <ul>
+                {observations.map((item, index) => (
+                  <li key={`${index}-${item}`}>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>
+                No additional visual observations were returned.
+              </p>
+            )}
+          </section>
+
+          {analysis.summary && (
+            <section className="hair-observations">
+              <h3>Your analysis summary</h3>
+              <p>{analysis.summary}</p>
+            </section>
+          )}
         </div>
 
         <aside className="result-side-card hair-result-side">
-
-          <p className="side-label">
-            WHAT WE RECOMMEND
-          </p>
+          <p className="side-label">YOUR NEXT STEPS</p>
 
           <h3>
-            Give your hair
+            Care for your hair
             <br />
-            the care
+            with a
             <br />
-            <em>it deserves.</em>
+            <em>consistent routine.</em>
           </h3>
 
           <p>
-            Your profile can guide you toward
-            products that support your hair type
-            while addressing your main concern.
+            Recommendations are intended for general cosmetic care.
+            A photo alone cannot reliably diagnose scalp conditions
+            or determine the cause of hair loss.
           </p>
 
-          <div className="focus-list">
+         <div className="focus-list">
+  {recommendations.length > 0 ? (
+    recommendations.map((item, index) => (
+      <div key={`${index}-${item}`}>
+        <span>{String(index + 1).padStart(2, "0")}</span>
+        <strong>{item}</strong>
+      </div>
+    ))
+  ) : (
+    <p>No AI recommendations were returned for this photo.</p>
+  )}
+</div>
 
-            <div>
-              <span>01</span>
-              <strong>Gentle cleansing</strong>
-            </div>
-
-            <div>
-              <span>02</span>
-              <strong>Targeted treatment</strong>
-            </div>
-
-            <div>
-              <span>03</span>
-              <strong>Consistent care</strong>
-            </div>
-
-          </div>
-
+          <button
+            type="button"
+            className="primary-button"
+            onClick={handleSaveProfile}
+            disabled={
+              saveStatus === "saving" || saveStatus === "saved"
+            }
+          >
+            {saveStatus === "saving"
+              ? "Saving…"
+              : saveStatus === "saved"
+                ? "Profile Saved"
+                : "Save My Hair Profile"}
+          </button>
         </aside>
-
       </section>
 
       <section className="result-cta hair-result-cta">
-
-        <p className="eyebrow">
-          NEXT STEP
-        </p>
+        <p className="eyebrow">NEXT STEP</p>
 
         <h2>
           Find your
@@ -215,20 +346,16 @@ function HairResult() {
         </h2>
 
         <p>
-          Explore products selected to complement
-          your hair profile and everyday needs.
+          Explore products that match your selected hair type and concern.
         </p>
 
-        
-      <Link
-        to="/products?view=recommended&focus=hair"
-        className="primary-button"
-      >
-        Explore My Recommendations →
-      </Link>
-
+        <Link
+          to="/products?view=recommended&focus=hair"
+          className="primary-button"
+        >
+          Explore My Recommendations →
+        </Link>
       </section>
-
     </main>
   );
 }

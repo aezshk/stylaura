@@ -21,6 +21,7 @@ const challengeRoutes = require("./routes/challengeRoutes");
 const recommendationRoutes = require("./routes/recommendationRoutes");
 const productImageRoutes = require("./routes/productImageRoutes");
 const passwordResetRoutes = require("./routes/passwordResetRoutes");
+const hairAnalysisRoutes = require("./routes/hairAnalysisRoutes");
 
 const app = express();
 
@@ -81,7 +82,7 @@ app.use("/api/product-images", productImageRoutes);
 app.use("/api/email-test", emailTestRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/password-reset", passwordResetRoutes);
-
+app.use("/api/analysis", hairAnalysisRoutes);
 // Serve existing local product images.
 app.use(
   "/products",
